@@ -1,0 +1,21 @@
+/*
+ * efuse
+ */
+/* T */ 
+EFUSE_HwInit = 0x0a000358;
+EFUSE_GetDeviceSize = 0x0a00054c;
+EFUSE_EnableWrite = 0x0a000552;
+EFUSE_DisableWrite = 0x0a00058c;
+EFUSE_GetChipId = 0x0a0005d0;
+EFUSE_GetLsiTrim = 0x0a000628;
+EFUSE_GetMsiTrim = 0x0a0006c0;
+EFUSE_GetPwrTrim = 0x0a0006fa;
+EFUSE_GetGpadcTrim = 0x0a00079e;
+EFUSE_GetDCXOFreqOffset = 0x0a00083e;
+EFUSE_GetMAC = 0x0a000852;
+EFUSE_GetMmwTrim = 0x0a000894;
+EFUSE_GetM50Trim = 0x0a000954;
+EFUSE_WriteUserArea = 0x0a000a14;
+EFUSE_ReadUseArea = 0x0a000a5c;
+EFUSE_AddCorrect = 0x0a000ad6;
+EFUSE_SetMAC = 0x0a000cb4;

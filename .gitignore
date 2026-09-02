@@ -1,0 +1,23 @@
+# Ignore everything by default.
+*
+
+# Keep directories visible so allowed files can be discovered recursively.
+!*/
+
+# Keep this rule file.
+!.gitignore
+
+# Keep approved source and document/project file types.
+!*.c
+!*.h
+!*.pdf
+!*.md
+!*.asm
+!*.s
+!*.docx
+!*.excel
+!*.cdkproj
+!*.sh
+
+# Keep every file under any Tool/lib directory.
+!**/Tool/lib/**

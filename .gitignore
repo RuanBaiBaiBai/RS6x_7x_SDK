@@ -15,9 +15,13 @@
 !*.asm
 !*.s
 !*.docx
-!*.excel
+!*.xlsx
+!*.xls
+!*.xlsm
+!*.csv
 !*.cdkproj
 !*.sh
+!*.txt
 
-# Keep every file under any Tool/lib directory.
-!**/Tool/lib/**
+
+

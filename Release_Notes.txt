@@ -1,0 +1,680 @@
+﻿Release Notes:
+=============
+----------------------------
+* V2.1.1_R0.0_M0.0.0.0 *
+----------------------------
+Feature(EN):
+    * Added HostSample - HIF Python tool for Linux environment.
+
+Perf(EN):
+    * Improved the radar analysis tool firmware for 6240 to address the frame dropping issue when reporting 1D-DataCube (256 points) at a 10ms interval on a laptop.
+
+Fix(EN):
+    * Fixed the abnormal 6241 point cloud performance issue and restored the point cloud density for real targets on the 6241;
+    * Fixed the issue where the Device restarts after configuration is sent in UART communication mode;
+    * Fixed the issue where the Device has a low probability of not responding to commands in UART communication mode.
+
+DOC(EN):
+    * Updated document: 《RS6X_7X_HIF_参考手册》;
+    * Updated document: 《RS6X_7X_HIF开发_快速入门》;
+    * Updated document: 《RS6X_7X_毫米波雷达_sample_参考手册》;
+    * Updated document: 《RS6X_7X_毫米波雷达_点云流程_参考手册》;
+    * Updated document: 《RS6X_7X_毫米波雷达_参考手册》;
+    * Updated document: 《RS6X_7X_毫米波雷达评估_快速入门》;
+    * Updated document: 《RS6130_Hardware_Design_and_PCB_Layout_Guidelines》;
+    * Added document: 《RS6xxx_Radar_Radome_Guidelines》.
+
+Tool(EN):
+    * Added HostSample - HIF Python tool for Linux environment;
+    * Updated tool HifMsgDataCollectionLib;
+    * Updated tool RadarDebugTool:
+        * Fixed the issue where the minimum frame period was still 50ms when selecting 1D-FFT mode in RadarDebugTool (minimum is 5ms after fix);
+        * Fixed the issue where the frame parameters obtained by RadarDebugTool parsing the Datacube bin file were inconsistent with the frame parameters actually used by the radar;
+        * Fixed the issue where RadarDebugTool & HifMsgDataCollectionLib would report a checksum error when parsing response data in UART communication mode;
+    * Updated tool RadarAnalysisTool:
+        * Modified the configurable value range limit for the maximum starting frequency;
+        * Fixed the issue where the 'value' obtained by clicking on the 2D heatmap with the mouse was incorrect;
+        * Fixed the issue in the 3D point cloud - point cloud accumulated frames function, where separate settings for point cloud and moving point cloud were abnormal.
+
+Known BUGS(EN):
+    * If the frame period configured in the radar analysis tool is too small, the issue of "incomplete data length" will occur, and it will not work properly after reconfiguration;
+    * The function pmu_tmr_init is not multi-core safe;
+    * At the HostDriver application layer, if the last data packet of this frame is lost, the entire frame data will be lost.
+
+
+Feature(CN):
+    * 新增HostSample - Linux环境下的HIF Python工具。
+
+Perf(CN):
+    * 改善6240的雷达分析工具固件，在笔记本上，以10ms周期上报1D-DataCube(256点)会丢帧的问题。
+
+Fix(CN):
+    * 修复6241点云性能异常问题，恢复6241真实目标的点云密度；
+    * 修复Uart通信方式下，下发配置后，Device重启的问题；
+    * 修复Uart通信方式下，Device低概率不回复指令的问题。
+
+DOC(CN):
+    * 更新文档《RS6X_7X_HIF_参考手册》；
+    * 更新文档《RS6X_7X_HIF开发_快速入门》；
+    * 更新文档《RS6X_7X_毫米波雷达_sample_参考手册》；
+    * 更新文档《RS6X_7X_毫米波雷达_点云流程_参考手册》；
+    * 更新文档《RS6X_7X_毫米波雷达_参考手册》；
+    * 更新文档《RS6X_7X_毫米波雷达评估_快速入门》；
+    * 更新文档《RS6130_Hardware_Design_and_PCB_Layout_Guidelines》;
+    * 新增《RS6xxx_Radar_Radome_Guidelines》.
+
+Tool(CN):
+    * 新增HostSample - Linux环境下的HIF Python工具；
+    * 更新工具HifMsgDataCollectionLib；
+    * 更新工具RadarDebugTool：
+        * 修复RadarDebugTool选择1D-FFT模式时，帧周期最小仍然是50ms的问题（修复后最小为5ms）；
+        * 修复RadarDebugTool解析Datacube bin文件得到的帧参数与雷达实际使用的帧参数不一致的问题；
+        * 修复RadarDebugTool&HifMsgDataCollectionLib，在Uart通信方式下，解析回复数据checksum error的问题；
+    * 更新工具RadarAnalysisTool：
+        * 修改最大起始频率可配置值限制范围；
+        * 修复鼠标点击2D热图显示获取的value值不对的问题；
+        * 修复3D点云 - 点云累积帧数功能存在点云和移动点云分别设置异常的问题。
+
+Known BUGS(CN):
+    * 工作雷达分析工具配置帧周期过小会出现“数据长度不完整”的问题，且重新配置后无法正常工作；
+    * 函数pmu_tmr_init多核不安全；
+    * HostDriver应用层，如果丢失这一帧数据的最后一个数据包，将会丢失该帧数据。
+
+----------------------------
+* V2.1.0_R0.0_M0.0.0.0 *
+----------------------------
+Feature(EN):
+    * Added board types mrs6241_p2828 and mrs6241_p2840;
+    * Added a radar framework to unify the codebase for most radar projects;
+    * The radar_analysis project now supports mrs6241_p2828 and mrs6241_p2840;
+    * Added radar projects: ReportDataCube1D, ReportDataCube2D, Posture, Sleep, and Tracking;
+    * Added Host projects: burn_sample, cmd_and_report_sample, hif_port_host_sample, multi_buff_sample, and multi_device_sample;
+    * Added Device projects: hif_spi, hif_uart, hif_i2c, hif_split, hif_port_device_sample, and hif_port_device_time_meas;
+    * Removed radar projects: factory_test, mmw_point_cloud, and r3_databox;
+    * Removed projects: r3_databox_host and RadarDebugTool_sample;
+    * Added system keep-alive mechanism, including heartbeat reporting, response count reporting, watchdog, and looptask monitor
+      for supervising radar operation status;
+    * Added support for 64M 4-line SPI;
+    * SPI 64M 1-line 2DFFT supports 256KB at 10Hz;
+    * SPI 64M 1-line 2DFFT supports 64KB at 50Hz;
+    * SPI 64M 1-line 1DFFT supports 8KB at 200Hz;
+    * HIF supports a timeout mechanism, releasing memory if not read within the timeout;
+    * HIF supports caching multiple frames to reduce the real-time requirements of the Linux system;
+    * HostDriver supports multiple slaves, including multiple slaves on different buses and multiple slaves on the same bus;
+    * HIF supports defining proprietary protocols;
+    * HostDriver supports parsing proprietary protocols;
+    * Added temperature-triggered calibration, triggered when temperature change exceeds 20°C;
+    * Moving point cloud supports up to 768 points;
+    * Support ADC, 1DFFT, 2DFFT, point cloud, micro-motion point cloud, and presence point cloud reporting;
+    * Added support for obtaining Interval 0 range FFT data when performing 2D-FFT in 2D frame mode;
+    * Added interfaces for configuring and retrieving radar calibration values;
+    * Added an interface for retrieving the frame start timestamp;
+    * Refactored the factory test function, streamlined the factory test API, improved ease of use, and maintained compatibility with
+      the existing factory test process.
+
+Perf(EN):
+    * Improved bootloader firmware loading speed;
+    * Optimized HIF architecture to improve data reliability (retransmission) and ease of use for large data transfers
+      (fragmentation);
+    * Optimized HostDriver architecture to improve data reliability (retransmission) and ease of use for large data
+      transfers (fragmentation);
+    * Optimized the presence detection algorithm, improving detection performance and reducing the false alarm rate;
+    * Refined memory usage of each module to free up more idle SRAM space.
+
+Fix(EN):
+    * Fixed the issue where, when reporting data via MSG ID C6, if the HIF message length exceeds 4 KB, the bridge chip may
+      interrupt reporting for 0.5 s, eventually causing radar memory overflow;
+    * Fixed the issue where UART 2M/4M transmission has a high bit error rate;
+    * Fixed the issue where thread creation hangs with extremely low probability;
+    * Fixed the issue where MRS6240_P2512 cannot be soft-rebooted;
+    * Fixed the issue where MISO is pulled low and stuck when using multiple SPI slaves;
+    * Fixed the issue where the actual frequency is not 112 MHz when 6130 is configured to 112 MHz;
+    * Fixed the issue where SPI configuration is incorrect after sleep/wake-up;
+    * Fixed the issue where OSI_MSleep cannot sleep indefinitely;
+    * Fixed the issue where the board_BlkDelay function has inaccurate delay timing;
+    * Fixed the issue where the UART FIFO watermark interrupt cannot be configured;
+    * Fixed the issue where triggering an interrupt during system scheduling may cause a hang with an extremely low probability;
+    * Fixed the issue where 6240 cannot boot after enabling DCXO;
+    * Fixed the issue where the watchdog cannot be used on 6240;
+    * Fixed the issue where adaptive gain is incorrect when Doppler FFT is not enabled.
+
+Doc(EN):
+    * Added document: 《RS6x_7x_HIF入门概述》;
+    * Added document: 《RS6x_7x_HIF_参考手册》;
+    * Added document: 《RS6241_Datasheet》;
+    * Added document: 《RS6241_Product_Brief》;
+    * Added document: 《RS6241_硬件设计和PCB Layout_指导手册》;
+    * Added document: 《RS6x_7x_毫米波雷达_sample_参考手册》;
+    * Added document: 《RS6x_7x_毫米波雷达_点云流程_参考手册》;
+    * Removed document: 《RS6x_7x_HIF通信格式_说明手册》;
+    * Removed document: 《RS6x_7x_R3_HOST驱动_开发手册》;
+    * Removed document: 《RS6x_7x_R3_毫米波雷达点云Demo_使用手册》;
+    * Updated document: 《MRS6130-AIP-DEV-V1_毫米波雷达开发板_使用手册》;
+    * Updated document: 《MRS6240-AIP-DEV-V1_毫米波雷达开发板_使用手册》;
+    * Updated document: 《RS6xxx_关键BOM选项_指导手册》;
+    * Updated document: 《RS6xxx_量产测试_指导手册》;
+    * Updated document: 《RS6130_硬件设计和PCB Layout_指导手册》;
+    * Updated document: 《RS6240_硬件设计和PCB Layout_指导手册》;
+    * Updated document: 《RS6x_7x_RadarAnalysisTool_使用手册》;
+    * Updated document: 《RS6x_7x_RadarDebugTool_使用手册》;
+    * Updated document: 《RS6x_7x_毫米波雷达_参考手册》;
+    * Updated document: 《RS6x_7x_毫米波雷达开发_快速入门》;
+    * Updated document: 《RS6x_7x_毫米波雷达评估_快速入门》.
+
+Tool(EN):
+    * Added a built-in CodeSize statistics script in the SDK;
+    * Updated tool: HifMsgDataCollectionLib;
+    * Updated tool: RadarAnalysisTool;
+    * Updated tool: RadarDebugTool.
+
+Known BUGs(EN):
+    * If the configuration frame period of the radar analysis tool is set too small, a "data length incomplete" issue may occur, and the
+      tool fails to work properly after reconfiguration;
+    * The function pmu_tmr_init is not multi-core safe;
+    * The HIF message-layer fragmentation feature may lose data with an extremely low probability;
+    * In the HostDriver application layer, if the last packet of a frame of data is lost, the entire frame will be lost.
+
+
+Feature(CN):
+    * 新增板型mrs6241_p2828、mrs6241_p2840；
+    * 新增雷达框架，统一大部分雷达工程的代码；
+    * radar_analysis工程支持mrs6241_p2828、mrs6241_p2840；
+    * 新增雷达工程ReportDataCube1D、ReportDataCube2D、Posture、Sleep、Tracking；
+    * 新增Host工程burn_sample、cmd_and_report_sample、hif_port_host_sample、multi_buff_sample、multi_device_sample；
+    * 新增Device工程hif_spi、hif_uart、hif_i2c、hif_split、hif_port_device_sample、hif_port_device_time_meas；
+    * 删除雷达工程factory_test、mmw_point_cloud、r3_databox；
+    * 删除工程r3_databox_host、RadarDebugTool_sample；
+    * 支持系统保活机制，包括心跳上报、response计数上报、看门狗、looptask monitor监控雷达运行状态；
+    * 支持64M 4线SPI；
+    * SPI 64M 1线2DFFT支持256KB 10Hz；
+    * SPI 64M 1线2DFFT支持64KB 50Hz；
+    * SPI 64M 1线1DFFT支持8KB 200Hz；
+    * HIF支持超时机制，超时不读会释放内存；
+    * HIF支持缓存多帧，降低Linux系统实时性要求；
+    * HostDriver支持多从机，包括不同总线多从机和相同总线多从机；
+    * HIF支持制定私有协议；
+    * HostDriver支持解析私有协议；
+    * 支持温度触发校正，温度变化超过20℃触发；
+    * 移动点云支持最多768个点；
+    * 支持ADC、1DFFT、2DFFT、点云、微动点云、存在点云上报；
+    * 支持2D帧模式下，执行2D-FFT时获取Interval0的距离FFT数据；
+    * 新增配置和获取雷达校准值的接口；
+    * 新增获取帧起始时间戳的接口；
+    * 重构产测功能，精简产测API，提升产测易用性，同时兼容原有产测流程。
+
+Perf(CN):
+    * 提升bootloader加载固件速度；
+    * 优化HIF架构，提高数据的可靠性（重传）和大数据量传输易用性（分片）；
+    * 优化HostDriver架构，提高数据的可靠性（重传）和大数据量传输易用性（分片）；
+    * 优化存在点云算法，提升存在点云探测性能，降低了存在点云虚检率；
+    * 细化各模块内存占用，释放更多空闲SRAM空间。
+
+Fix(CN):
+    * 修复MSG ID C6上报数据时，如果HIF消息长度大于4KB，转接芯片可能会中断上报0.5s，最终导致雷达内存溢出的问题；
+    * 修复UART 2M/4M传输时误码率高的问题；
+    * 修复创建线程时极低概率挂死的问题；
+    * 修复MRS6240_P2512无法软重启的问题；
+    * 修复SPI多从机时会拉死MISO的问题；
+    * 修复6130配置为112M时，实际频率不是112M的问题；
+    * 修复SPI休眠唤醒后配置不正确的问题；
+    * 修复OSI_MSleep无法永久休眠的问题；
+    * 修复board_BlkDelay函数延时不准的问题；
+    * 修复无法设置UART FIFO水位中断的问题；
+    * 修复系统调度时触发中断会极低概率挂死的问题；
+    * 修复6240开启DCXO后无法启动的问题；
+    * 修复6240无法使用看门狗的问题；
+    * 修复了不开启多普勒FFT时自适应增益的错误。
+
+Doc(CN):
+    * 新增文档《RS6x_7x_HIF入门概述》；
+    * 新增文档《RS6x_7x_HIF_参考手册》；
+    * 新增文档《RS6241_Datasheet》；
+    * 新增文档《RS6241_Product_Brief》；
+    * 新增文档《RS6241_硬件设计和PCB Layout_指导手册》；
+    * 新增文档《RS6x_7x_毫米波雷达_sample_参考手册》；
+    * 新增文档《RS6x_7x_毫米波雷达_点云流程_参考手册》；
+    * 删除文档《RS6x_7x_HIF通信格式_说明手册》；
+    * 删除文档《RS6x_7x_R3_HOST驱动_开发手册》；
+    * 删除文档《RS6x_7x_R3_毫米波雷达点云Demo_使用手册》；
+    * 更新文档《MRS6130-AIP-DEV-V1_毫米波雷达开发板_使用手册》；
+    * 更新文档《MRS6240-AIP-DEV-V1_毫米波雷达开发板_使用手册》；
+    * 更新文档《RS6xxx_关键BOM选项_指导手册》；
+    * 更新文档《RS6xxx_量产测试_指导手册》；
+    * 更新文档《RS6130_硬件设计和PCB Layout_指导手册》；
+    * 更新文档《RS6240_硬件设计和PCB Layout_指导手册》；
+    * 更新文档《RS6x_7x_RadarAnalysisTool_使用手册》；
+    * 更新文档《RS6x_7x_RadarDebugTool_使用手册》；
+    * 更新文档《RS6x_7x_毫米波雷达_参考手册》；
+    * 更新文档《RS6x_7x_毫米波雷达开发_快速入门》；
+    * 更新文档《RS6x_7x_毫米波雷达评估_快速入门》；
+
+Tool(CN):
+    * 新增SDK内置的CodeSize统计脚本；
+    * 更新工具HifMsgDataCollectionLib；
+    * 更新工具RadarAnalysisTool；
+    * 更新工具RadarDebugTool。
+
+Known BUGs(CN):
+    * 雷达分析工具配置帧周期过小会出现“数据长度不完整”的问题，且重新配置后无法正常工作；
+    * 函数pmu_tmr_init多核不安全；
+    * HIF消息层分片功能极低概率丢失数据；
+    * HostDriver应用层，如果丢失这一帧数据的最后一个数据包，将会丢失该帧数据。
+
+----------------------------
+* V2.0.6_R0.0_M0.0.0.0-alpha *
+----------------------------
+Feature(EN):
+    * Added support for the HOST Sample to handle data with a size of 64 kB at a frequency of 50 Hz, reported
+      via SPI;
+    * Moved part of the SPI driver content to RAM.
+
+Fix(EN):
+    * Fixed the issue of excessively long power-off time in the mmw_point_cloud project.
+    * Fixed the issue of excessively where the timestamp for adaptive gain reporting after configuration distribution
+	  was not reset to zero in the r3_databox project.
+
+Doc(EN):
+    * Added the following explanations in the Q&A section of the document 《RS6x_7x_R3_HOST驱动_开发手册》
+        * Checksum verification issue caused by the radar receiving payloads greater than or equal to 1024 bytes;
+        * Calculation method for the minimum frame period in the radar analysis tool.
+
+Tool(EN):
+
+Known BUGs(EN):
+    * The SPI mode of the radar analysis firmware for 7241 is not functioning properly;
+    * When reporting data via MSG ID C6, if the HIF message length exceeds 4 kB, the transfer chip may interrupt
+       reporting for 0.5s, eventually causing radar memory overflow;
+    * If the radar analysis sample's frame period configured too small, a "data length incomplete" issue may occur,
+      and normal operation cannot be restored after reconfiguration.
+
+
+Feature(CN):
+    * HOST Sample增加对数据量为64kB频率为50Hz，通过SPI上报数据的支持；
+    * 将SPI驱动中的部分内容转移至RAM。
+
+Fix(CN):
+    * 修复mmw_point_cloud工程下电时间过长的问题。
+    * 修复r3_databox工程下发配置后自适应增益上报的时间戳未清零的问题
+
+Doc(CN):
+    * 在文档《RS6x_7x_R3_HOST驱动_开发手册》的Q&A章节添加以下说明：
+        * 雷达接收payload大于等于1024字节产生的checksum校验问题；
+        * 雷达分析工具最小帧周期计算方式。
+
+Tool(CN):
+
+Known BUGs(CN):
+    * RS7241的radar analysis固件的SPI模式无法正常工作；
+    * 通过MSG ID C6上报数据时，如果HIF消息长度大于4kB，转接芯片可能会中断上报0.5s，最终导致雷达内存溢出；
+    * 雷达分析工具配置帧周期过小会出现“数据长度不完整”的问题，且重新配置后无法正常工作。
+
+----------------------------
+* V2.0.5_R0.0_M0.0.0.0-alpha *
+----------------------------
+Feature(EN):
+    * Support RS7241 series chips;
+    * MMW has added the following interfaces: set ADC sampling rate, pause static clutter updates, obtain FFT gain, set and obtain FFT window type;
+    * Point_cloud_demo provides a point cloud demo project with PM enabled by default
+    * Support more pointcloud, more calculate time needed;
+	* The new features of the radar algorithm public component are as follows:
+        * Added multiple original point cloud filter configurations;
+        * Reorganized configuration items to support more static configuration of algorithm common components;
+    * New production increase test demo;
+    * HIF: Modify the NULL TAIL content, and accordingly, when the host requests data but the radar does not have enough data entries, the replied NULL TAIL will change;
+    * Enhance HIF stability;
+    * Add Host Sample example;
+
+Fix(EN):
+    * Point_cloud_demo and r3_databox have been fixed as follows:
+        * Update the heap occupancy size and fix the issue of excessive heap allocation when micro point clouds are not enabled;
+    * R3_databox fixes stability issues;
+    * The common components of the radar algorithm have been repaired as follows:
+        * Fix the issue of abnormal internal configuration in the 6130 radar coordinate system;
+        * The RS6240 chip prioritizes obtaining antenna calibration data from Flash. If the acquisition fails, default antenna calibration data will be used;
+    * Fixed the issue where HIF does not support sleep wake when using SPI;
+    * Fix the issue where GPIO cannot be used after enabling sleep wake-up;
+
+Doc(EN):
+    * Add the document 'RS6xxx_SOST-Development Manual'
+
+Tool(EN):
+    * RadarAnalysisTool has added the following features:
+        * New command to pause static clutter update shell;
+        * Add DCXO startup time shell command;
+        * Add FFT window type configuration shell command;
+        * Support RS7241；
+        * Fixed doppler direction reverse issue in RD heatmap;
+
+Known BUGs(EN):
+    * Point_cloud_demo and r3_databox may experience memory opening failure at a distance of FFT=512. In this case, it is necessary to increase the heap space in prjconfig. h;
+    * The SPI mode of the radar_analysis firmware for 7241 is not functioning properly;
+
+
+Feature(CN):
+    * 支持RS7241系列芯片；
+    * mmw新增接口如下：设置ADC采样率，暂停静态杂波更新，获取FFT增益，设置、获取FFT窗类型；
+    * point_cloud_demo提供默认开启PM的point cloud demo工程
+    * 支持更多点云输出，增加额外计算时间
+    * 雷达算法公共组件新增功能如下：
+        * 新增了多种原始点云过滤器配置；
+        * 重组了配置项，支持算法公共组件更多的静态配置；
+    * 新增产测demo；
+    * 修改HIF中的NULL TAIL内容，相应地，主机请求数据而雷达没有足够的数据条数时，回复的NULL TAIL将发生变化；
+    * 增强HIF稳定性，修复HIF接收命令长度超256字节会挂死的问题;
+    * 新增Host Sample示例；
+
+Fix(CN):
+    * point_cloud_demo和r3_databox修复如下：
+        * 更新堆占用大小，修复未开启微动点云时，堆分配过大的问题；
+    * r3_databox修复稳定性问题；
+    * 雷达算法公共组件修复如下：
+        * 修复RS6130雷达坐标系内部配置异常的问题；
+        * RS6240芯片优先从Flash中获取天线校准数据，若获取失败，使用默认的天线校准数据；
+    * 修复HIF使用SPI时不支持休眠唤醒的问题；
+    * 修复GPIO在开启休眠唤醒后无法使用的问题；
+
+Doc(CN):
+    * 新增《RS6x_7x_R3_HOST驱动_开发手册》文档
+
+Tool(CN):
+    * RadarAnalysisTool新增如下功能：
+        * 新增暂停静态杂波更新shell命令；
+        * 新增DCXO启动时间shell命令；
+        * 新增FFT窗类型配置shell命令；
+        * 新增对RS7241的支持；
+        * 修复了2D距离-速度热图速度方向反向的问题
+
+Known BUGs(CN):
+    * point_cloud_demo和r3_databox在距离FFT=512下，可能出现内存开辟失败，此时需要在prj_config.h中增大堆空间；
+    * RS7241的radar_analysis固件的SPI模式无法正常工作；
+    * 使用双串口模式传输数据时，CPU进入休眠模式的时间延时为13ms，使用SPI模式传输数据时，CPU进入休眠模式的延时为6ms。
+	
+----------------------------
+* V2.0.4_R0.0_M0.0.0.0-alpha *
+----------------------------
+Feature(EN):
+    * Optimized and supplemented the HIF SPI communication protocol to enhance 
+	  compatibility and robustness. Modified the type value of complete ack, etc. For 
+	  specific changes, refer to the version history in the RS6x_7x_HIF Communication 
+	  Format Specification Manual.
+
+Fix(EN):
+    * Fixed the CDK compilation and packaging failure caused by uninstalled Git.
+
+Doc(EN):
+    * The RS6x_7x_HIF Communication Format Specification Manual has been updated with 
+	  the optimization and supplementation of the HIF SPI communication protocol.
+
+
+Tool(EN)：
+    * Added the HifMsgDataCollectionLib dynamic library, which supports online radar 
+	  data acquisition for PC development. Currently, it is compatible with the data 
+	  protocol used by RadarDebugTool.
+
+
+Known BUGs(EN):
+    * Configuration deployment may fail in r3_databox when frame cycle is set too 
+	  short with excessive data transmission volume.
+
+
+Feature(CN):
+    * HIF SPI通信协议优化及补充，增强兼容性和健壮性。修改了complete ack的类型值等，具体修改参考《RS6x_7x_HIF通信格式_说明手册》版本历史。
+	
+Fix(CN):
+    * 修复因未安装git导致cdk编译打包失败问题
+	
+Doc(CN):
+    * 《RS6x_7x_HIF通信格式_说明手册》对HIF SPI通信协议优化及补充；
+	
+Tool(CN)：
+    * 新增HifMsgDataCollectionLib动态库，支持PC开发在线获取雷达数据，目前支持RadarDebugTool所用的数据协议。
+	
+Known BUGs(CN):
+    * r3_databox帧周期配置过小，且数据传输量过大时，下发配置可能会失败。
+    * 如果将HIF映射至SPI,暂不支持休眠唤醒功能；
+
+----------------------------
+* V2.0.3_R0.0_M0.0.0.0-alpha *
+----------------------------
+Change Log:
+Feature(EN):
+    * Added support for asynchronous PSIC debugging protocol interface.
+    * Implemented configuration checks for specific waveform settings in r3_databox 
+	  to prevent misconfiguration.
+
+Fix(EN):
+    * Fixed incorrect pinmux configuration.
+    * Optimized the validation method for effective angle measurement values, resolving 
+	  CPU exceptions caused by negative inputs to square root operations in subsequent 
+	  processing.
+    * Fixed potential failure issue when switching between 1D-FFT and 2D-FFT reports in 
+	  the RadarAnalysisTool project.
+    * Fixed erroneous 1D-FFT reporting issue in the RadarAnalysisTool project.
+
+Perf(EN):
+    * Upgraded all data transmission modules in the r3_databox sample project to 
+	  asynchronous transfer for optimized efficiency.
+    * Optimized the 1D-FFT transmission protocol in r3_databox.
+
+Doc(EN):
+    * Added: DataCube parsing instructions in RS6x/7x RadarDebugTool User Manual.
+    * Added: Guidance on CFAR algorithm selection for evaluation in RS6x/7x mmWave 
+	  Radar Evaluation Quick Start Guide.
+    * Added: Explanation of adaptive gain functionality in RS6x/7x mmWave Radar 
+	  Development Quick Start Guide.
+
+Tool(EN)：
+    * RadarDebugTool (v1.0.0.2): Fixed DataCube reception errors.
+    * RadarDebugTool (v1.0.0.2): Added adaptive adjustment for 3D point cloud 
+	  coordinate ranges.
+	* RadarAnalysisTool (V1.2.0.7): Fixed an issue where an excessively small minimum 
+	  frame cycle limit could cause incomplete data reception.
+
+Known BUGs(EN):
+    * Configuration deployment may fail in r3_databox when frame cycle is set too 
+	  short with excessive data transmission volume.
+    * If HIF is mapped to SPI, the sleep and wake-up functions are not supported temporarily.
+
+Feature(CN):
+    * 新增支持异步接口的PSIC调试协议；
+    * 新增r3_databox对部分波形配置进行检查，防止配置误操作。
+Fix(CN):
+    * 修复pinmux配置错误的问题；
+    * 优化了测角有效值判断的判定方法，解决后续处理出现开方输入为负值导致CPU异常的问题；
+    * 修复了RadarAnalysisTool工程切换1D-FFT和2D-FFT上报的可能会失败的问题；
+    * 修复了RadarAnalysisTool工程上报1D-FFT错误的问题；
+Perf(CN):
+    * r3_databox示例工程的数据传输模块均修改为异步传输以优化传输效率；
+    * 优化r3_databox 1D-FFT传输协议；
+Doc(CN):
+    * 新增：《RS6x_7x_RadarDebugTool_使用手册》对DataCube数据解析部分说明；
+    * 新增：《RS6x_7x_毫米波雷达评估_快速入门》对如何选择CFAR算法进行评估说明；
+    * 新增：《RS6x_7x_毫米波雷达开发_快速入门》对自适应增益的说明。
+Tool(CN)：
+    * RadarDebugTool(v1.0.0.2)：修复了接收DataCube错误的问题；
+    * RadarDebugTool(v1.0.0.2)：新增了3D点云坐标范围自适应调整；
+	* RadarAnalysisTool(V1.2.0.7)：修复了最小Frame周期限制过小导致数据接收不完整的问题
+Known BUGs(CN):
+    * r3_databox帧周期配置过小，且数据传输量过大时，下发配置可能会失败。
+    * 如果将HIF映射至SPI,暂不支持休眠唤醒功能；
+	
+
+----------------------------
+* V2.0.2_R0.0_M0.0.0.0-alpha *
+----------------------------
+Change Log:
+Feature(EN):
+  Radar:
+    * Newly defined user coordinate system: 
+        - All development boards have the USB port facing down (side-mounted vertically) 
+		  and the USB port facing right (side-mounted horizontally);
+        - The target coordinates output by RadarAnalysisTool, point cloud, and r3_databox 
+		  are all under the user coordinate system.
+    * Newly defined radar coordinate system to ensure that the radar coordinate systems 
+	  of RS6130 and RS6240 have similar antenna arrangements. Please refer to the 
+	  <RS6x_7x_r3_PointCloud_Demo_User_Manual>.
+    * The RadarAnalysisTool project newly supports RS6130 micro-motion point cloud.
+    * The point cloud project supports micro-motion point cloud calculation and reporting.
+    * The r3_databox project newly adds micro-motion point cloud, DataCube reporting 
+	  (disabled by default), and caches and reports Range-FFT data when executing the 
+	  2D-FFT process (disabled by default).
+    * Support for switching between different CFAR algorithms is available in RadarAnalysisTool 
+	  point cloud and r3_databox project.
+      - The standard CA-CFAR has a relatively low point cloud density and is suitable for 
+	    use indoors or on mobile platforms.
+      - The signal-to-noise ratio threshold method has a relatively high point cloud density 
+	    and is suitable for use in outdoor environments with sparse targets.
+    * RadarAnalysisTool supports configuring whether to enable micro-motion point cloud.
+    * Optimized HIF interface transmission efficiency.
+    * The maximum DataCube can support 10Hz reporting.
+    * The point cloud can support 20Hz reporting.
+    * Use the memory management functions provided by the OS instead of C library functions 
+	  in the point cloud algorithm.
+    * The mmw_point_cloud_process() function no longer actively calls the function to restore 
+	  adaptive gain; users need to manually call it at the end of the callback function.
+    * For all radar samples, calculate the moving point cloud first, then the micro-motion 
+	  point cloud to increase the upper limit of the frame rate.
+    * Renamed the cosValue_Y member of the MmwAngleInfo_t structure to sinValue_Y to conform 
+	  to physical logic.
+    * Improved the comments in the r3_databox project and fixed the comment errors.
+  Driver:
+    * Added UART sleep and wake-up functions.
+
+Fix(EN):
+    * Fixed the header file configured in the point cloud project. The error in the 
+	  configuration controlled by the MRS6130-P1806 macro caused the point cloud project of 
+	  MRS6130-P1806 to use the same serial port for printing and HIF.
+
+Known BUGs(EN):
+    * If HIF is mapped to SPI, the sleep and wake-up functions are not supported temporarily.
+
+
+Feature(CN):
+  Radar:
+      * 新定义用户坐标系
+      	- 所有开发板USB口朝下（侧装竖直）、USB口朝右（侧装水平）
+	- RadarAnalysisTool/point cloud/r3_databox均输出用户坐标系下的目标坐标；
+      * 新定义雷达坐标系，确保RS6130和RS6240的雷达坐标系，天线排列相似。
+	    请参考《RS6x_7x_r3_点云Demo_使用手册》；
+      * RadarAnalysisTool工程新增支持RS6130微动点云;
+      * point cloud工程支持微动点云计算和上报;
+      * r3_databox工程新增微动点云、DataCube上报（默认关闭）、执行2D-FFT流程时缓存Range-FFT
+	    数据并上报（默认关闭）。
+      * 在RadarAnalysisTool, point cloud, r3_databox工程中支持切换不同的CFAR算法。
+      	- 标准的CA-CFAR点云密度偏小，适合在室内或移动平台上使用；
+      	- 信噪比阈值方法点云密度较高，适合在室外目标稀疏的情况下使用；
+      * RadarAnalysisTool支持配置是否使能微动点云；
+      * 优化了HIF接口传输效率
+      	- 最大DataCube可支持10Hz上报
+      	- 点云可支持20Hz上报
+      * 在点云算法中使用OS提供的内存管理函数，不使用C库函数；
+      * 在mmw_point_cloud_process()函数中不再主动调用恢复自适应增益函数，需要用户在回调函数
+	    的最后手动调用；
+      * 所有雷达Sample，首先计算移动点云，再计算微动点云，以提升帧率上限；
+      * 重命名MmwAngleInfo_t结构体成员cosValue_Y为sinValue_Y，以符合物理逻辑；
+      * 完善了r3_databox工程的注释，修复了注释错误的问题；
+
+  Driver:
+      * 新增UART的休眠唤醒功能；
+
+Fix(CN):
+      * 修复了point cloud工程配置的头文件，配置MRS6130-P1806宏控制的错误，导致MRS6130-P1806的
+	    point cloud工程打印和HIF使用相同的串口；
+
+Known BUGs(CN):
+      * 如果将HIF映射至SPI,暂不支持休眠唤醒功能；
+
+----------------------------
+* V2.0.1_R0.0_M0.0.0.0-alpha *
+----------------------------
+Change Log:
+* RadarDebugTool download/upload/visualization support.
+* Both SPI & UART interface are support for MRS6240-P2512 & MRS6130-P1812, default UART-SPI mode in sample
+* HIF on UART0 MRS6130-P1806 when connect with RadarDebugTool.
+* Support power manage
+* Support more clock configuration options
+* Update the document
+
+----------------------------
+* V2.0.0_R0.0_M0.0.0.4-alpha *
+----------------------------
+Change Log:
+* radar analysis sample support point cloud.
+
+----------------------------
+* V2.0.0_R0.0_M0.0.0.2-alpha *
+----------------------------
+Change Log:
+* radar analysis sample support rs6130.
+
+
+----------------------------
+* V2.0.0_R0.0_M0.0.0.0-alpha *
+----------------------------
+Change Log:
+* sdk v2.0.0-alpha.
+
+Feature:
+* SDK V2.0.0
+
+Kernel
+******
+* Kheap
+* Mutex
+* Semaphore
+* Thread
+* Queue
+* List
+* Timer
+* XIP
+
+Build and Infrastructure
+************************
+* CDK
+
+Boards
+******
+mrs6130_p1806
+mrs6130_p1812
+mrs6240_p2512
+	mrs6240_p2512__cpus
+	mrs6240_p2512__cpuf
+
+Libraries / Subsystems
+**********************
+* Log
+* Shell
+* hif
+* kv
+* etc.
+
+Boards & SoC Support
+********************
+* Support PSIC RS6 Series
+
+FMCW MMWave
+***********
+* 1T3R MISO
+* 2T4R MIMO
+* Range FFT
+* Doppler FFT
+* 3D Point Cloud
+* Micro-Doppler Point Cloud
+  
+Drivers and Sensors
+*******************
+* Clock Control
+* Console
+* Flash
+* GPIO
+* I2C
+* Pinctrl
+* PWM
+* RTC
+* Serial/UART
+* SPI
+* Watchdog
+* WKIO
+* WUP
+
+

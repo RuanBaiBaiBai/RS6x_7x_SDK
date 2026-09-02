@@ -1,0 +1,21 @@
+/*
+ * efuse
+ */
+[T]
+EFUSE_HwInit
+EFUSE_GetDeviceSize
+EFUSE_EnableWrite
+EFUSE_DisableWrite
+EFUSE_GetChipId
+EFUSE_GetLsiTrim
+EFUSE_GetMsiTrim
+EFUSE_GetPwrTrim
+EFUSE_GetGpadcTrim
+EFUSE_GetDCXOFreqOffset
+EFUSE_GetMAC
+EFUSE_GetMmwTrim
+EFUSE_GetM50Trim
+EFUSE_WriteUserArea
+EFUSE_ReadUseArea
+EFUSE_AddCorrect
+EFUSE_SetMAC

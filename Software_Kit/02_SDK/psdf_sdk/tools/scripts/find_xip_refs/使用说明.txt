@@ -1,0 +1,65 @@
+﻿============================================================
+ find_xip_refs.py 使用说明
+ 反汇编 jal/jalr 调用链递归检索 & XIP 引用检测工具
+============================================================
+
+【功能】
+  从指定函数出发，递归追踪它内部所有 jal / jalr 调用，逐层进入
+  被调用的函数继续检索，直到没有 jal/jalr 为止。每个调用目标会
+  按地址判断落在哪个内存区，并把 XIP 引用标记出来。
+
+------------------------------------------------------------
+【环境要求】
+  - Python 3 (无需安装任何第三方库)
+
+------------------------------------------------------------
+【文件清单】
+  find_xip_refs.py   主程序
+  config.ini         配置文件 (输入/输出/排除列表)
+  使用说明.txt        本文件
+
+------------------------------------------------------------
+【快速开始】
+  1) 打开 config.ini，把 [input] 的 func改成指定要递归的函数名称和asm 改成反汇编文件绝对路径
+  2) 在命令行运行 (把函数名换成你要查的入口函数):
+
+         python find_xip_refs.py mmw_point_cloud_process
+
+  3) 屏幕打印调用链树状结果；同时在当前目录生成 CSV:
+         mmw_point_cloud_process_xip.csv
+
+------------------------------------------------------------
+【config.ini 说明】
+  [input]
+    func = 起始函数名
+    asm = 反汇编文件路径 (建议绝对路径)
+
+  [output]
+    csv = 输出 CSV 路径；留空则自动用 “<函数名>_xip.csv”
+
+  [exclude]
+    functions =
+        memset
+        printf*
+    递归时命中这些名字的函数会被直接跳过。
+    一行一个，# 开头为注释，支持通配符:
+        printf*   匹配 printf 开头的所有函数
+        lib_*     匹配 lib_ 开头
+        *_init    匹配 _init 结尾
+
+------------------------------------------------------------
+【命令行参数】(可覆盖 config.ini)
+  python find_xip_refs.py <函数名> [选项]
+
+  --config 路径     指定配置文件 (默认: 脚本同目录 config.ini)
+  --asm 路径        指定反汇编文件 (覆盖配置里的 asm)
+  --csv 路径        指定 CSV 输出 (覆盖配置里的 csv)
+  --no-csv          本次不生成 CSV
+  --max-depth N     最大递归深度 (默认 50)
+
+  示例:
+    python find_xip_refs.py mmw_point_cloud_process
+    python find_xip_refs.py mmw_point_cloud_process --asm D:\proj\dump.asm
+    python find_xip_refs.py mmw_point_cloud_process --csv D:\out\r.csv
+    python find_xip_refs.py mmw_point_cloud_process --no-csv
+    python find_xip_refs.py mmw_point_cloud_process --config other.ini

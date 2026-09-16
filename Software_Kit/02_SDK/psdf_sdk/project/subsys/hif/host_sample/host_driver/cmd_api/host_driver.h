@@ -88,7 +88,7 @@ void Host_Driver_Deinit(void);
  *
  * @param pDevHdl_out Pointer of device handle.
  *
- * @param hw_cfg Hardware param of device.
+ * @param hw_cfg Hardware param of device, you can use DevHw_Set_DefaultParam to config this param.
  *
  * @param hif_cfg Configuration of HIF.
  *

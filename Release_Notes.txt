@@ -1,5 +1,113 @@
 ﻿Release Notes:
 =============
+
+----------------------------
+* V2.1.2_R0.0_M0.0.0.0 *
+----------------------------
+Feature(EN):
+    * Provide multiple presence point cloud CFAR configurations.
+
+Perf(EN):
+    * Improve firmware download stability of host_driver under poor communication quality.
+
+Fix(EN):
+    * Fix the issue where wake-up and sleep commands rarely cause abnormal system sleep;
+    * Fix the issue of inaccurate GPADC power supply voltage measurement when vddio is powered at 1.8V;
+    * Correct the parameter type of the complex16_logdB interface;
+    * Fix the unstable calibration issue when the mmw_ctrl_open force_calib parameter is set to 0, and update the calibration data version number;
+    * Fix the data race issue caused by host_driver UART calling the interrupt callback function in a non-interrupt context when the notification type is COM_IRQ_THREAD and the interrupt_ctrl interface is not registered.
+
+DOC(EN):
+    * Update document: 《RS6X_7X_HIF_参考手册》;
+    * Update document: 《RS6X_7X_HIF开发_快速入门》;
+    * Update document: 《RS6x_7x_毫米波雷达_sample_参考手册》;
+    * Update document: 《RS6x_7x_毫米波雷达_点云流程_参考手册》;
+    * Add document: 《RS6241_Hardware_Design_and_PCB_Layout_Guide》;
+    * Add document: 《MRS6241-P2828-M62_mmWave_Radar_Module_Datasheet》;
+    * Add document: 《MRS6241-P2840-M81_mmWave_Radar_Module_Datasheet》;
+    * Add document: 《MRSx241-DEV-V1_mmWave_Radar_Development_Board_User_Guide》;
+    * Add document: 《RS6x_7x_HIF_Development_Quick_Start_Guide》;
+    * Add document: 《RS6x_7x_HIF_Reference_Manual》;
+    * Add document: 《RS6x_7x_mmWave_Radar_Development_Quick_Start_Guide》;
+    * Add document: 《RS6x_7x_mmWave_Radar_Evaluation_Quick_Start_Guide》;
+    * Add document: 《RS6x_7x_mmWave_Radar_Point_Cloud_Processing_Reference_Manual》;
+    * Add document: 《RS6x_7x_mmWave_Radar_Reference_Manual》;
+    * Add document: 《RS6x_7x_mmWave_Radar_Sample_Reference_Manual》;
+    * Add document: 《RS6x_7x_RadarAnalysisTool_User_Guide》;
+    * Add document: 《RS6x_7x_RadarDebugTool_User_Guide》;
+    * Add document: 《RS6x_7x_SDK_Reference_Manual》;
+    * Add document: 《RS6xxx_Firmware_Download_Development_Guide》;
+    * Add document: 《RS6x_7x_DSP_Interface_Specification_Manual》.
+
+Tool(EN):
+    * Update RadarAnalysisTool:
+        * Fix the issue where the second decimal place of some parameters is lost when dragging the radar parameter configuration sliders;
+        * Change the 2D/3D point cloud frame accumulation implementation to accumulate presence point cloud and motion point cloud separately;
+        * Adjust the configurable range of the SNR value in the presence point cloud report data configuration.
+
+HostDriver(EN):
+    * Provide HostDriver example for FreeRTOS environment;
+    * Provide HostDriver Python tool for Linux environment;
+    * Provide HostDriver porting example for ESP32S3 environment.
+
+Known BUGs(EN):
+    * The Radar Analysis Tool may report a "data length incomplete" error when the configured frame period is too small; increase the frame period to resolve this;
+    * The function pmu_tmr_init is not multi-core safe;
+    * In the HostDriver application layer, if the last data packet of a frame is lost, the entire frame data will be lost.
+
+
+Feature(CN):
+    * 提供多种存在点云CFAR配置。
+
+Perf(CN):
+    * 提高host_driver在通信质量较差时的固件下载稳定性。
+
+Fix(CN):
+    * 解决唤醒与休眠指令极低概率导致系统休眠异常的问题；
+    * 解决vddio在1.8V供电下，GPADC电源电压测量不准的问题；
+    * 修正接口complex16_logdB的参数类型；
+    * 修复mmw_ctrl_open force_calib参数配0校正不稳定问题，更改校正数据版本号；
+    * 修复host_driver UART在通知类型为COM_IRQ_THREAD且不注册interrupt_ctrl接口时，于非中断上下文调用中断回调函数，会导致数据竞争的问题。
+
+DOC(CN):
+    * 更新文档《RS6X_7X_HIF_参考手册》；
+    * 更新文档《RS6X_7X_HIF开发_快速入门》；
+    * 更新文档《RS6x_7x_毫米波雷达_sample_参考手册》；
+    * 更新文档《RS6x_7x_毫米波雷达_点云流程_参考手册》；
+    * 新增文档《RS6241_Hardware_Design_and_PCB_Layout_Guide》；
+    * 新增文档《MRS6241-P2828-M62_mmWave_Radar_Module_Datasheet》；
+    * 新增文档《MRS6241-P2840-M81_mmWave_Radar_Module_Datasheet》；
+    * 新增文档《MRSx241-DEV-V1_mmWave_Radar_Development_Board_User_Guide》；
+    * 新增文档《RS6x_7x_HIF_Development_Quick_Start_Guide》；
+    * 新增文档《RS6x_7x_HIF_Reference_Manual》；
+    * 新增文档《RS6x_7x_mmWave_Radar_Development_Quick_Start_Guide》；
+    * 新增文档《RS6x_7x_mmWave_Radar_Evaluation_Quick_Start_Guide》；
+    * 新增文档《RS6x_7x_mmWave_Radar_Point_Cloud_Processing_Reference_Manual》；
+    * 新增文档《RS6x_7x_mmWave_Radar_Reference_Manual》；
+    * 新增文档《RS6x_7x_mmWave_Radar_Sample_Reference_Manual》；
+    * 新增文档《RS6x_7x_RadarAnalysisTool_User_Guide》；
+    * 新增文档《RS6x_7x_RadarDebugTool_User_Guide》；
+    * 新增文档《RS6x_7x_SDK_Reference_Manual》；
+    * 新增文档《RS6xxx_Firmware_Download_Development_Guide》；
+    * 新增文档《RS6x_7x_DSP_Interface_Specification_Manual》。
+
+Tool(CN):
+    * 更新RadarAnalysisTool：
+        * 修复拖动雷达参数配置各拖动条时，部分参数丢失小数部分第二位的问题；
+        * 修改2D、3D点云绘图帧累积功能实现方式为移动点云和存在点云各自累积；
+        * 修改存在点云上报数据配置SNR值可配置范围。
+
+HostDriver(CN)：
+    * 提供FreeRTOS环境下的HostDriver示例；
+    * 提供Linux环境下的HostDriver Python工具；
+    * 提供ESP32S3环境下的HostDriver移植示例。
+
+Known BUGs(CN):
+    * 雷达分析工具配置帧周期过小会出现“数据长度不完整”的问题，应增大帧周期；
+    * 函数pmu_tmr_init多核不安全；
+    * HostDriver应用层，如果丢失这一帧数据的最后一个数据包，将会丢失该帧数据。
+
+
 ----------------------------
 * V2.1.1_R0.0_M0.0.0.0 *
 ----------------------------

@@ -81,7 +81,7 @@ int MmwCmd_General_StartFreq_Cfg(DEV_HANDLE DevHdl, uint32_t start_freq)
     uint8_t resp_buff[1];
     param[0] = 0x12;
     param[1] = 0x02;
-    param[2] = start_freq & 0xFF;;
+    param[2] = start_freq & 0xFF;
     param[3] = (start_freq >> 8) & 0xFF;
 
     ret = Host_General_Command(DevHdl, msg_id, param, param_len, resp_buff, buffer_len, NULL);
@@ -102,7 +102,7 @@ int MmwCmd_General_TriggerRange_Cfg(DEV_HANDLE DevHdl, uint32_t trigger_range)
     uint8_t resp_buff[1];
     param[0] = 0x13;
     param[1] = 0x02;
-    param[2] = trigger_range & 0xFF;;
+    param[2] = trigger_range & 0xFF;
     param[3] = (trigger_range >> 8) & 0xFF;
 
     ret = Host_General_Command(DevHdl, msg_id, param, param_len, resp_buff, buffer_len, NULL);
@@ -123,7 +123,7 @@ int MmwCmd_General_RangeResolution_Cfg(DEV_HANDLE DevHdl, uint32_t range_resolut
     uint8_t resp_buff[1];
     param[0] = 0x14;
     param[1] = 0x02;
-    param[2] = range_resolution & 0xFF;;
+    param[2] = range_resolution & 0xFF;
     param[3] = (range_resolution >> 8) & 0xFF;
 
     ret = Host_General_Command(DevHdl, msg_id, param, param_len, resp_buff, buffer_len, NULL);
@@ -144,7 +144,7 @@ int MmwCmd_General_MaxVelocity_Cfg(DEV_HANDLE DevHdl, uint32_t max_velocity)
     uint8_t resp_buff[1];
     param[0] = 0x15;
     param[1] = 0x02;
-    param[2] = max_velocity & 0xFF;;
+    param[2] = max_velocity & 0xFF;
     param[3] = (max_velocity >> 8) & 0xFF;
 
     ret = Host_General_Command(DevHdl, msg_id, param, param_len, resp_buff, buffer_len, NULL);
@@ -165,7 +165,7 @@ int MmwCmd_General_VelResolution_Cfg(DEV_HANDLE DevHdl, uint32_t vel_resolution)
     uint8_t resp_buff[1];
     param[0] = 0x16;
     param[1] = 0x02;
-    param[2] = vel_resolution & 0xFF;;
+    param[2] = vel_resolution & 0xFF;
     param[3] = (vel_resolution >> 8) & 0xFF;
 
     ret = Host_General_Command(DevHdl, msg_id, param, param_len, resp_buff, buffer_len, NULL);

@@ -19,7 +19,11 @@
 /* micro cube config */
 #define FAST_CUBE_FFT_AUTOGAIN          1
 #if (FAST_CUBE_FFT_AUTOGAIN)
+#if CONFIG_SOC_SERIES_RS613X
 #define FAST_CUBE_FFT_GAIN_ADAPT_S16    (-10) /* -30dB for int16_t */
+#elif (CONFIG_SOC_SERIES_RS624X || CONFIG_SOC_SERIES_RS724X)
+#define FAST_CUBE_FFT_GAIN_ADAPT_S16    (-8) /* -24dB for int16_t */
+#endif
 #endif
 #define MICRO_CHIRP_DOP1_EN             0  /* using fast doppler +-1 */
 

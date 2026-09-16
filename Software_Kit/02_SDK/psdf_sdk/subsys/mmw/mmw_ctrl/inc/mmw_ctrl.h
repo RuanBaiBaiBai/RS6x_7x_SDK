@@ -26,7 +26,9 @@
 extern "C" {
 #endif
 
-#define CONFIG_MMW_CHRIP_CALIB_COMP_EN	(1)
+#if (CONFIG_MMW_CALIB_CHIRP_STORAGE)
+#define CONFIG_MMW_CHRIP_CALIB_COMP_EN	(0)
+#endif
 
 /************************ Internal declaration **********************/
 int mmw_sensor_stop(void);
@@ -83,7 +85,7 @@ int mmw_sensor_reset(void);
 
 /* config storage format macro for data check */
 #define MMW_STORAGE_CHIRP_CALIB_MAGIC	 (0x5AA5)
-#define MMW_STORAGE_CHIRP_CALIB_VERSION  (0x03)
+#define MMW_STORAGE_CHIRP_CALIB_VERSION  (0x04)
 
 #define CLR_MSK(word, msk)                       ((word) &= (~((uint32_t)(msk))))
 #define CLR_BIT(word, num)                       ((word) &= (~(uint32_t)(1U << (num))))
@@ -104,6 +106,8 @@ void set_dbg_uart_port(uint8_t uart_port, uint8_t io_port);
  * @param pll_lc Selection of pll clock source between DCXO and Self-osc. DCXO
  *               only for now which is False.
  * @param force_calib Enable force to calibrate the mmw RF.
+ *                    Note: True is recommended, False is only used in ULP
+ *                    mode using button cell and CONFIG_MMW_CALIB_CHIRP_STORAGE is enable.
  *
  * @return MMWave error code (defined MMW_ERR_CODE_*), Zero on success.
  */

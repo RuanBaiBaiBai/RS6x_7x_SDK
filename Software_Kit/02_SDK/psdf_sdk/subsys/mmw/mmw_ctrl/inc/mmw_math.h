@@ -33,7 +33,7 @@ double fast_pow(double base, double exp);
 uint32_t fast_cabs_int16(int16_t real, int16_t imag);
 uint32_t fast_cabs_int32(int32_t real, int32_t imag);
 /* for vector calculation */
-void complex16_logdB(uint16_t *dst, uint32_t *src, uint32_t num, uint32_t src_step);
+void complex16_logdB(int16_t *dst, uint32_t *src, uint32_t num, uint32_t src_step);
 void complex16_abs16(uint16_t *dst, uint32_t *src, uint32_t num, uint32_t src_step);
 void complex16_abs32(uint32_t *dst, uint32_t *src, uint32_t num, uint32_t src_step);
 

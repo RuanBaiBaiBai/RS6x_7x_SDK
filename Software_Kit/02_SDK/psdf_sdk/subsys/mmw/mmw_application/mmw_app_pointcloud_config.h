@@ -227,12 +227,12 @@
 
 /* CFAR threshold for presence point cloud */
 #ifndef CONFIG_MMW_PRESENCE_POINT_CLOUD_CFAR_TH_DB
-#define CONFIG_MMW_PRESENCE_POINT_CLOUD_CFAR_TH_DB			(14)
+#define CONFIG_MMW_PRESENCE_POINT_CLOUD_CFAR_TH_DB			(8.5)
 #endif
 
 /* CFAR linear threshold offest value for presence point cloud */
 #ifndef CONFIG_MMW_PRESENCE_POINT_CLOUD_CFAR_LINEAR_TH_OFFEST_DB
-#define CONFIG_MMW_PRESENCE_POINT_CLOUD_CFAR_LINEAR_TH_OFFEST_DB	(0)
+#define CONFIG_MMW_PRESENCE_POINT_CLOUD_CFAR_LINEAR_TH_OFFEST_DB	(1.5)
 #endif
 
 /**
@@ -385,8 +385,8 @@ typedef struct {
 } MmwPointCloudUserCfg_t;
 
 typedef struct {
-	uint8_t micro_ca_cfar_snr_th;					/* ca cfar snr threshold, unit: dB */
-	uint8_t micro_ca_cfar_snr_linear_th_offest;		/* ca cfar snr linear threshold offest value */
+	float micro_ca_cfar_snr_th;					/* ca cfar snr threshold, unit: dB */
+	float micro_ca_cfar_snr_linear_th_offest;		/* ca cfar snr linear threshold offest value */
 	uint8_t micro_frame_div_factor;					/* micro cube down sampling factor */
 	uint8_t micro_cube_range_extract_frequency; 	/* micro cube range bin filter step size */
 	uint8_t micro_chirp_num;						/* chirp num in one frame */

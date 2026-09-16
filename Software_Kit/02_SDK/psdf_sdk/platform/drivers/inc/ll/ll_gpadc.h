@@ -738,7 +738,7 @@ void LL_GPADC_SetChConfig(uint32_t channel_id)
 	LL_GPADC_SetMode(LL_GPADC_SIGLE_CYCLE_MODE);
 
 	LL_GPADC_Disable_InputShrink_Bypass();
-	LL_GPADC_SetInputShrink(LL_GPADC_INPUT_SHRINK_SCALE_1_3);
+	LL_GPADC_SetInputShrink(LL_GPADC_INPUT_SHRINK_SCALE_2_3);
 	LL_GPADC_DisableOverSmpl();
 	LL_GPADC_Disable_AllChDataIntr();
 	LL_GPADC_Clr_Intr_Flag0();

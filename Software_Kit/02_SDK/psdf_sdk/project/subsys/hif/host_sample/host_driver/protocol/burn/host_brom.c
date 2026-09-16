@@ -298,6 +298,7 @@ static int host_brom_protocol_comm_read(void *phdr, uint32_t hdr_size, void *pda
     uint32_t recv_size = 0;
     uint32_t total_size = 0;
     uint8_t err_retry = 0;
+    bool found = false;
 
     /* Note:
      * The hdr is a mandatory, while the data is an optional item.
@@ -317,6 +318,50 @@ static int host_brom_protocol_comm_read(void *phdr, uint32_t hdr_size, void *pda
         ret = host_brom_protocol_com_read(&precv[recv_size], total_size - recv_size);
         if (ret > 0) {
             recv_size += ret;
+            if (!found) {
+                for (uint32_t i = 0; i + 4 <= recv_size; i++) {
+                    if (precv[i] == host_burn_magic[0]
+                        && precv[i+1] == host_burn_magic[1]
+                        && precv[i+2] == host_burn_magic[2]
+                        && precv[i+3] == host_burn_magic[3]) {
+                        if (i != 0) {
+                            host_os_memcpy(&precv[0], &precv[i], recv_size - i);
+                            recv_size -= i;
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    if (recv_size >= 3
+                        && precv[recv_size - 3] == host_burn_magic[0]
+                        && precv[recv_size - 2] == host_burn_magic[1]
+                        && precv[recv_size - 1] == host_burn_magic[3]) {
+                        precv[0] = host_burn_magic[0];
+                        precv[1] = host_burn_magic[1];
+                        precv[2] = host_burn_magic[2];
+                        recv_size = 3;
+                    } else if (recv_size >= 2
+                               && precv[recv_size - 2] == host_burn_magic[0]
+                               && precv[recv_size - 1] == host_burn_magic[1]) {
+                        precv[0] = host_burn_magic[0];
+                        precv[1] = host_burn_magic[1];
+                        recv_size = 2;
+                    } else if (recv_size >= 1
+                               && precv[recv_size - 1] == host_burn_magic[0]) {
+                        precv[0] = host_burn_magic[0];
+                        recv_size = 1;
+                    } else {
+                        recv_size = 0;
+                    }
+                    if (++err_retry >= HOST_BURN_BROM_READ_RETRY_TIMES_MAX) {
+//                        HOST_LOG_ERR("%s:check err! ret=%d\n", __func__, ret);
+                        break;
+                    } else {
+                        host_os_delayms(10);
+                    }
+                }
+            }
         } else {
             if (++err_retry >= HOST_BURN_BROM_READ_RETRY_TIMES_MAX) {
                 HOST_LOG_ERR("%s:read err! ret=%d\n", __func__, ret);
@@ -326,21 +371,14 @@ static int host_brom_protocol_comm_read(void *phdr, uint32_t hdr_size, void *pda
             }
         }
         if (recv_size == total_size) {
-//            if ((precv[0] == host_burn_magic[0])
-//                && (precv[1] == host_burn_magic[1])
-//                && (precv[2] == host_burn_magic[2])
-//                && (precv[3] == host_burn_magic[3])) {
-                if (data_size > 0) {
-                    host_os_memcpy(phdr, &precv[0], hdr_size);
-                    host_os_memcpy(pdata, &precv[hdr_size], data_size);
-                }
-                status = HOST_ERRCODE_SUCCESS;
-                HOST_LOG_DBG_HEX(phdr, hdr_size, "HDR->");
-                HOST_LOG_DBG_HEX(pdata, data_size, "PLY->");
-                break;
-//            } else {
-//                recv_size = 0;
-//            }
+            if (data_size > 0) {
+                host_os_memcpy(phdr, &precv[0], hdr_size);
+                host_os_memcpy(pdata, &precv[hdr_size], data_size);
+            }
+            status = HOST_ERRCODE_SUCCESS;
+            HOST_LOG_DBG_HEX(phdr, hdr_size, "HDR->");
+            HOST_LOG_DBG_HEX(pdata, data_size, "PLY->");
+            break;
         }
     } while (1);
 
@@ -360,6 +398,7 @@ static int host_brom_protocol_rsp_read_check(
 {
     int status = HOST_ERRCODE_SUCCESS;
 
+    host_os_delayms(delayms);
     for (uint32_t idx = 0; idx < CFG_HOST_BURN_RSP_RETRY_CNT; idx++) {
         status = host_brom_protocol_comm_read(phdr, hdr_size, pdata, data_size);
         if (status != HOST_ERRCODE_SUCCESS) {
@@ -368,10 +407,10 @@ static int host_brom_protocol_rsp_read_check(
 
         status = host_brom_protocol_rsp_check(phdr, hdr_size, pdata, data_size);
         if (status != HOST_ERRCODE_SUCCESS) {
-            extern bool host_burn_current_device_is_notify_data(void);
-            if (!host_burn_current_device_is_notify_data()) {
+//            extern bool host_burn_current_device_is_notify_data(void);
+//            if (!host_burn_current_device_is_notify_data()) {
                 host_os_delayms(delayms);
-            }
+//            }
             continue;
         } else {
             break;
@@ -584,7 +623,7 @@ static int host_brom_protocol_flash_write_rsp(void)
 {
     _ALIGNAS_VARIABLE rsp_ack_t rsp_buff;
 
-    return host_brom_protocol_rsp_read_check(&rsp_buff, RSP_ACK_SIZE, NULL, 0, 20);
+    return host_brom_protocol_rsp_read_check(&rsp_buff, RSP_ACK_SIZE, NULL, 0, 50);
 }
 
 
@@ -718,7 +757,8 @@ int host_brom_protocol_flash_read(uint32_t addr_start, uint32_t page_num, void *
 
     return status;
 }
-#endif
+#endif  /* CFG_HOST_BURN_FLASH_READ_EN */
+#endif  /* CFG_HOST_BURN_FLASH_EN */
 
 
 #if (CFG_HOST_BURN_RUN_EN)
@@ -775,8 +815,7 @@ int host_brom_protocol_setpc(uint32_t run_addr)
 
     return status;
 }
-#endif
-#endif
+#endif  /* CFG_HOST_BURN_RUN_EN */
 
 
 /*

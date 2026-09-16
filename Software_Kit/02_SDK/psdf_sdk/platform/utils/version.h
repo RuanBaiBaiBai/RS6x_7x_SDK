@@ -112,7 +112,7 @@ typedef struct {
 #endif
 
 #ifndef VERSION_V_REVISION
-#define VERSION_V_REVISION                0
+#define VERSION_V_REVISION                2
 #endif
 
 #ifndef VERSION_R_TYPE

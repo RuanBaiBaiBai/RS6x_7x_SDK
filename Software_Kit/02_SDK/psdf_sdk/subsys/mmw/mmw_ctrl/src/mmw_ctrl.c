@@ -187,7 +187,7 @@ static uint16_t cal_checksum16(uint8_t *buffer, uint32_t size)
 	return (uint16_t)(~checksum);
 }
 
-#if (CONFIG_MMW_CALIB_DATA_LOAD)
+#if (CONFIG_MMW_CALIB_CHIRP_STORAGE)
 static void mmw_chirp_data_calibration(bool force_calib)
 {
 	int idx ;
@@ -196,10 +196,9 @@ static void mmw_chirp_data_calibration(bool force_calib)
 	if (force_calib || mmwc_set_chirp_calib_data() < 0) {
 		for (idx = 0; idx < MMW_MAX_CALIB_NUM; idx++) {
 			if (mmw_set_calib_sw(MMW_CALIB_SIGMADELTA, 1) == 0) {
-			#if (CONFIG_MMW_CALIB_DATA_LOAD)
-				if (!force_calib)
+				if (!force_calib) {
 					mmwc_save_chirp_calib_data();
-			#endif
+				}
 				break;
 			}
 		}
@@ -322,37 +321,6 @@ static int mmw_storage_save_data(uint32_t id, uint8_t *data, size_t len)
 	return ret;
 }
 
-int mmwc_set_angle_calib_data(complex16_cube *calib_data, uint8_t rx_num)
-{
-	int ret;
-	uint32_t chip_info[MMW_CALIB_DATA_LEN>>2] = { 0 };
-	for (uint8_t rx_ant = 0; rx_ant < MMW_ANGLE_CALIB_RX_ANT; rx_ant++) {
-		if (rx_ant < rx_num) {
-			chip_info[rx_ant * (MMW_ANGLE_CALIB_RX_ANT + 1)] = \
-				calib_data[rx_ant].real + (calib_data[rx_ant].imag << 16);
-		} else {
-			chip_info[rx_ant * (MMW_ANGLE_CALIB_RX_ANT + 1)] = 2048;
-		}
-	}
-	chip_info[16] = (1 << 12);
-	chip_info[17] = 15561;
-	ret = mmw_calibration_data((uint8_t *)&chip_info[0], MMW_CALIB_DATA_LEN);
-	return ret;
-}
-
-int mmwc_save_angle_calib_data(uint8_t *calib_data, uint8_t len)
-{
-	if (len != HWINFO_SIZE_NVM_MMW_CALIB) {
-		return -1;
-	}
-	int ret = KVF_Save(HWINFO_ID_NVM_ANT_CALIB_1T3R, calib_data, len);
-	if (ret != len) {
-		return -1;
-	}
-
-	return 0;
-}
-
 #if (CONFIG_MMW_CHRIP_CALIB_COMP_EN)
 int mmwc_set_chirp_calib_data(void)
 {
@@ -390,6 +358,7 @@ int mmwc_set_chirp_calib_data(void)
 	ret = mmw_storage_checksum16_check(compress_data, compress_size);
 	if (ret != 0) {
 		ret = -(MMW_ERR_CODE_EIO | MMW_ERR_SUBCODE_CHECKSUM);
+		debug_err("chirp calib verion %d, need %d\n", version, MMW_STORAGE_CHIRP_CALIB_VERSION);
 		goto exit;
 	}
 
@@ -498,7 +467,7 @@ exit:
 int mmwc_set_chirp_calib_data(void)
 {
 	int ret;
-	uint8_t *pCalData = k_malloc(MMW_STORAGE_CHIRP_CALIB_SIZE);
+	uint8_t *pCalData = OSI_Malloc(MMW_STORAGE_CHIRP_CALIB_SIZE);
 	uint8_t *compress_data = pCalData;
 	uint32_t compress_size = MMW_STORAGE_CHIRP_CALIB_SIZE;
 	uint16_t version;
@@ -524,6 +493,7 @@ int mmwc_set_chirp_calib_data(void)
 	version = compress_data[0] | (compress_data[1] << 8);
 	if (version != MMW_STORAGE_CHIRP_CALIB_VERSION) {
 		ret = -MMW_ERR_CODE_UNSUPPORT;
+		debug_err("chirp calib verion %d, need %d\n", version, MMW_STORAGE_CHIRP_CALIB_VERSION);
 		goto exit;
 	}
 
@@ -539,7 +509,7 @@ int mmwc_set_chirp_calib_data(void)
 	mmw_chirp_calibdata_set((uint16_t *)compress_data, MMW_CHIRP_CALIB_SIZE >> 1);
 exit:
 	if (pCalData) {
-		k_free(pCalData);
+		OSI_Free(pCalData);
 	}
 
 	if (ret < 0) {
@@ -551,7 +521,7 @@ exit:
 int mmwc_save_chirp_calib_data(void)
 {
 	int ret;
-	uint8_t *pCalData = k_malloc(MMW_STORAGE_CHIRP_CALIB_SIZE);
+	uint8_t *pCalData = OSI_Malloc(MMW_STORAGE_CHIRP_CALIB_SIZE);
 	uint8_t *compress_data = pCalData;
 	uint32_t compress_size = MMW_STORAGE_CHIRP_CALIB_SIZE;
 	int checksum;
@@ -601,7 +571,7 @@ int mmwc_save_chirp_calib_data(void)
 
 exit:
 	if (pCalData) {
-		k_free(pCalData);
+		OSI_Free(pCalData);
 	}
 
 	if (ret < 0) {
@@ -628,9 +598,40 @@ static void mmw_chirp_data_calibration(bool force_calib)
 		//sys_reboot(SYS_REBOOT_COLD);
 	}
 }
+#endif //#if (CONFIG_MMW_CALIB_CHIRP_STORAGE)
 
-#endif //#if (CONFIG_MMW_CALIB_DATA_LOAD)
+#if (CONFIG_MMW_CALIB_DATA_LOAD)
+int mmwc_set_angle_calib_data(complex16_cube *calib_data, uint8_t rx_num)
+{
+	int ret;
+	uint32_t chip_info[MMW_CALIB_DATA_LEN>>2] = { 0 };
+	for (uint8_t rx_ant = 0; rx_ant < MMW_ANGLE_CALIB_RX_ANT; rx_ant++) {
+		if (rx_ant < rx_num) {
+			chip_info[rx_ant * (MMW_ANGLE_CALIB_RX_ANT + 1)] = \
+				calib_data[rx_ant].real + (calib_data[rx_ant].imag << 16);
+		} else {
+			chip_info[rx_ant * (MMW_ANGLE_CALIB_RX_ANT + 1)] = 2048;
+		}
+	}
+	chip_info[16] = (1 << 12);
+	chip_info[17] = 15561;
+	ret = mmw_calibration_data((uint8_t *)&chip_info[0], MMW_CALIB_DATA_LEN);
+	return ret;
+}
 
+int mmwc_save_angle_calib_data(uint8_t *calib_data, uint8_t len)
+{
+	if (len != HWINFO_SIZE_NVM_MMW_CALIB) {
+		return -1;
+	}
+	int ret = KVF_Save(HWINFO_ID_NVM_ANT_CALIB_1T3R, calib_data, len);
+	if (ret != len) {
+		return -1;
+	}
+
+	return 0;
+}
+#endif
 
 void dbg_uart_enable(uint8_t enable)
 {

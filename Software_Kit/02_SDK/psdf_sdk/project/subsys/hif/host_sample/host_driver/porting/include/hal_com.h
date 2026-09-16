@@ -53,34 +53,145 @@ typedef enum {
  *     baudrate for uart
  * called when bus open or close
  */
+/**
+ * @brief Open bus.
+ *
+ * @param id The bus id, the id is defined by yourself,
+ *           such as, id=0 is SPI2, id=1 is SPI3.
+ *
+ * @param speed The bus speed, if device has other speed,
+ *              you can ignore the param.
+ *
+ * @param arg The bus param set by yourself.
+ *
+ * @retval bus handle witch is defined by yourself.
+ */
 typedef void * (*host_com_init_t)(uint8_t id, uint32_t speed, void *arg);
+/**
+ * @brief Close bus.
+ *
+ * @param bus The bus handle.
+ *
+ * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
+ */
 typedef int (*host_com_deinit_t)(void *bus);
 
-/* param
+/* param such as
  *     cs_pin   for spi
  *     addr     for i2c
  *     id       for uart
+ * can defined by yourself
  * called when device open or close
  */
+/**
+ * @brief Open device.
+ *
+ * @param bus The bus handle.
+ *
+ * @param param The device param set by yourself.
+ *
+ * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
+ */
 typedef int (*host_com_open_t)(void *bus, uint32_t param);
+/**
+ * @brief Close device.
+ *
+ * @param bus The bus handle.
+ *
+ * @param param The device param set by yourself.
+ *
+ * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
+ */
 typedef int (*host_com_close_t)(void *bus, uint32_t param);
 
+/* write and read must return 0 or >0
+ * if return >0, means the number of write or read bytes
+ */
+/**
+ * @brief Send data to a device.
+ *
+ * @param bus The bus handle.
+ *
+ * @param param The device param set by yourself.
+ *
+ * @param pbuff The buffer to be sent.
+ *
+ * @param size The buffer size, unit is byte.
+ *
+ * @retval >0     -->  the number of sent bytes,
+ *         other  -->  error occured.
+ */
 typedef int (*host_com_write_t)(void *bus, uint32_t param, void *pbuff, uint32_t size);
+/**
+ * @brief Recv data from a device.
+ *
+ * @param bus The bus handle.
+ *
+ * @param param The device param set by yourself.
+ *
+ * @param pbuff The buffer to be recved.
+ *
+ * @param size The buffer size, unit is byte.
+ *
+ * @retval >0     -->  the number of recved bytes,
+ *         other  -->  error occured.
+ */
 typedef int (*host_com_read_t)(void *bus, uint32_t param, void *pbuff, uint32_t size);
 
+/**
+ * @brief Send a signal to a device indicating completion of recv,
+ *        allowing the start of the next round of recv.
+ *
+ * @note After the interface is called, if there is data that can
+ *       be recved, it is necessary to call the handle registed
+ *       with `host_com_interrupt_handle_regist_t` to notify HostDriver
+ *       to recv data.
+ *       Only defined when notify_type is LLC_NOTIFY_TYPE_COM_IRQ_THREAD
+ *       or LLC_NOTIFY_TYPE_COM_ISR.
+ *
+ * @param bus The bus handle.
+ *
+ * @param param The device param set by yourself.
+ *
+ * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
+ */
 typedef int (*host_com_read_finish_t)(void *bus, uint32_t param);
 
 /**
- * @param size, the number of data to recv
+ * @brief Control interrupt enable/disable, control interrupt thr,
+ *        unit is byte.
+ *
+ * @note Only defined when notify_type is LLC_NOTIFY_TYPE_COM_IRQ_THREAD
+ *       or LLC_NOTIFY_TYPE_COM_ISR.
+ *       If notify_type is LLC_NOTIFY_TYPE_COM_IRQ_THREAD, you can define
+ *       it or not, if it is defined, all rx_cache will be used to cache
+ *       the data. The size of rx_cache is defined by macro
+ *       `CFG_LLC_DEVICE_RX_CACHE_SIZE` at host_config.h, unit is byte.
+ *
+ * @param bus The bus handle.
+ *
+ * @param en Enable or disable interrupt.
+ *
+ * @param size The number of data to recv, the interrupt thr.
+ *
+ * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
 typedef int (*host_com_interrupt_ctrl_t)(void *bus, bool en, uint32_t size);
 
 /**
- * @brief when data available, call the interrupt handle
+ * @brief Regist data recving and processing callback function.
+ *
+ * @param bus The bus handle.
+ *
+ * @param handler Call the handle, if there is data that can be recv.
+ *
+ * @param arg The handle arg.
+ *
+ * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
 typedef int (*host_com_interrupt_handle_regist_t)(void *bus, host_com_interrupt_handler_t handler, void *arg);
 /**
- * @brief when data recv ok, call the callback function
+ * @brief This function has been abandoned.
  */
 typedef int (*host_com_data_callback_regist_t)(void *bus, host_com_data_callback_t cb, void *arg);
 

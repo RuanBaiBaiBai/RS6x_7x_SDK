@@ -78,9 +78,9 @@
  */
 #if CONFIG_PRINTF_EARLY
 extern void printf_hook_install(int (*fn)(char c));
-__sram_text static int printfEarly_char_out(char val);
-__sram_text static void printfEarly_HwInit(void * param);
-__sram_text static void printfEarly_HwDeinit(void);
+static int printfEarly_char_out(char val);
+static void printfEarly_HwInit(void * param);
+static void printfEarly_HwDeinit(void);
 #endif
 
 /* Exported functions.

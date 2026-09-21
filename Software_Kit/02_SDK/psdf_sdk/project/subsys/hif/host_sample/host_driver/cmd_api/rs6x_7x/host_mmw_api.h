@@ -127,6 +127,31 @@ typedef struct {
 // none
 
 
+/* Exported MMW Const.
+ * ------------------------------------------------------------------------------------------------
+ */
+/**
+ * @group radar analysis
+ */
+#define HOST_HIF_RADAR_ANALYSIS_MMW_MIMO_1T1R            0
+#define HOST_HIF_RADAR_ANALYSIS_MMW_MIMO_1T3R            1
+#define HOST_HIF_RADAR_ANALYSIS_MMW_MIMO_2T3R            2
+#define HOST_HIF_RADAR_ANALYSIS_MMW_MIMO_1T4R            3
+#define HOST_HIF_RADAR_ANALYSIS_MMW_MIMO_2T4R            4
+#define HOST_HIF_RADAR_ANALYSIS_MMW_MIMO_1T2R            5
+#define HOST_HIF_RADAR_ANALYSIS_MMW_MIMO_LAST            6
+
+#define HOST_HIF_RADAR_ANALYSIS_MMW_MODE_1DFFT           1
+#define HOST_HIF_RADAR_ANALYSIS_MMW_MODE_2DFFT           2
+
+#define HOST_HIF_RADAR_ANALYSIS_MMW_REPORT_TYPE_CUBE               0
+#define HOST_HIF_RADAR_ANALYSIS_MMW_REPORT_TYPE_MMIC               2
+#define HOST_HIF_RADAR_ANALYSIS_MMW_REPORT_TYPE_POINTS             4
+#define HOST_HIF_RADAR_ANALYSIS_MMW_REPORT_TYPE_TRACKING           5
+#define HOST_HIF_RADAR_ANALYSIS_MMW_REPORT_TYPE_POINTS_TRACKING    6
+#define HOST_HIF_RADAR_ANALYSIS_MMW_REPORT_TYPE_DISABLE            0xFF
+
+
 /* Exported functions of send command.
  * ------------------------------------------------------------------------------------------------
  */
@@ -172,7 +197,7 @@ int MmwCmd_General_FrameType_Cfg(DEV_HANDLE DevHdl, uint32_t frame_type);
  *
  * @param DevHdl Device handle.
  *
- * @param start_freq The start frequence.
+ * @param start_freq The start frequence, unit is MHz.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -183,7 +208,7 @@ int MmwCmd_General_StartFreq_Cfg(DEV_HANDLE DevHdl, uint32_t start_freq);
  *
  * @param DevHdl Device handle.
  *
- * @param trigger_range The max range.
+ * @param trigger_range The max range, unit is mm.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -194,7 +219,7 @@ int MmwCmd_General_TriggerRange_Cfg(DEV_HANDLE DevHdl, uint32_t trigger_range);
  *
  * @param DevHdl Device handle.
  *
- * @param trigger_range The range resolution.
+ * @param trigger_range The range resolution, unit is mm.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -205,7 +230,7 @@ int MmwCmd_General_RangeResolution_Cfg(DEV_HANDLE DevHdl, uint32_t range_resolut
  *
  * @param DevHdl Device handle.
  *
- * @param trigger_range The max velocity.
+ * @param trigger_range The max velocity, unit is mm/s.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -216,7 +241,7 @@ int MmwCmd_General_MaxVelocity_Cfg(DEV_HANDLE DevHdl, uint32_t max_velocity);
  *
  * @param DevHdl Device handle.
  *
- * @param trigger_range The velocity resolution.
+ * @param trigger_range The velocity resolution, unit is mm/s.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -227,7 +252,7 @@ int MmwCmd_General_VelResolution_Cfg(DEV_HANDLE DevHdl, uint32_t vel_resolution)
  *
  * @param DevHdl Device handle.
  *
- * @param trigger_range The frame period.
+ * @param trigger_range The frame period, unit is ms.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -270,9 +295,11 @@ int MmwCmd_RadarAnalysis_Stop(DEV_HANDLE DevHdl);
  *
  * @param DevHdl Device handle.
  *
- * @param txrx The mimo mode.
+ * @param txrx The mimo mode,
+ *              macro HOST_HIF_RADAR_ANALYSIS_MMW_MIMO_xTxR.
  *
- * @param mode The frame type.
+ * @param mode The frame type,
+ *              macro HOST_HIF_RADAR_ANALYSIS_MMW_MODE_xDFFT.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -283,9 +310,9 @@ int MmwCmd_RadarAnalysis_Mode_Cfg(DEV_HANDLE DevHdl, uint32_t txrx, uint32_t mod
  *
  * @param DevHdl Device handle.
  *
- * @param start_freq The start frequence.
+ * @param start_freq The start frequence, unit is MHz.
  *
- * @param max_freq The max frequence.
+ * @param max_freq The max frequence, unit is MHz, can set to 0 means there's no limit on max MHz.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -296,9 +323,9 @@ int MmwCmd_RadarAnalysis_Freq_Cfg(DEV_HANDLE DevHdl, uint32_t start_freq, uint32
  *
  * @param DevHdl Device handle.
  *
- * @param range The max range.
+ * @param range The max range, unit is mm.
  *
- * @param resol The range resolution.
+ * @param resol The range resolution, unit is mm.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -309,9 +336,9 @@ int MmwCmd_RadarAnalysis_Range_Cfg(DEV_HANDLE DevHdl, uint32_t range, uint32_t r
  *
  * @param DevHdl Device handle.
  *
- * @param veloc The max velocity.
+ * @param veloc The max velocity, unit is mm/s.
  *
- * @param resol The velocity resolution.
+ * @param resol The velocity resolution, unit is mm/s.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -322,9 +349,9 @@ int MmwCmd_RadarAnalysis_Veloc_Cfg(DEV_HANDLE DevHdl, uint32_t veloc, uint32_t r
  *
  * @param DevHdl Device handle.
  *
- * @param period The frame period.
+ * @param period The frame period, unit is ms.
  *
- * @param num The frame number, 0 -> no limit, > 0 -> frame number.
+ * @param num The frame number, `0` -> no limit, `>0` -> frame number.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -335,9 +362,9 @@ int MmwCmd_RadarAnalysis_Frame_Cfg(DEV_HANDLE DevHdl, uint32_t period, uint32_t 
  *
  * @param DevHdl Device handle.
  *
- * @param period The interval period.
+ * @param period The interval period, unit is us.
  *
- * @param intv_num The interval number.
+ * @param intv_num The interval number in a frame.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -348,7 +375,7 @@ int MmwCmd_RadarAnalysis_Intv_Cfg(DEV_HANDLE DevHdl, uint32_t period, uint32_t i
  *
  * @param DevHdl Device handle.
  *
- * @param num The chirp number.
+ * @param num The number of chirps sending in a interval, must be power of 2.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -359,9 +386,10 @@ int MmwCmd_RadarAnalysis_ChirpNum_Cfg(DEV_HANDLE DevHdl, uint32_t num);
  *
  * @param DevHdl Device handle.
  *
- * @param report_type The report data type.
+ * @param report_type The report data type,
+ *              macro HOST_HIF_RADAR_ANALYSIS_MMW_REPORT_TYPE_xxxx.
  *
- * @param report_num The report data number.
+ * @param report_num The number of frame to upload.
  *
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
@@ -672,6 +700,19 @@ int Mmw_FE_Heartbeat_Handle_Set(DEV_HANDLE DevHdl, Report_CB cb, void *cb_arg);
  * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
  */
 int Mmw_FE_Heartbeat_Data_Parse(Heartbeat_Data_t *heartbeat_out, uint8_t *data, uint32_t data_len);
+
+/**
+ * @brief Set 0xFF startup handle.
+ *
+ * @param DevHdl Device handle.
+ *
+ * @param cb The data callback function.
+ *
+ * @param cb_arg The data callback function arg.
+ *
+ * @retval HostDriver error code, HOST_ERRCODE_SUCCESS on success.
+ */
+int Mmw_FF_Startup_Handle_Set(DEV_HANDLE DevHdl, Report_CB cb, void *cb_arg);
 
 #ifdef __cplusplus
 }

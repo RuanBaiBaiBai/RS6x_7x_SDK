@@ -17,10 +17,38 @@
 extern "C" {
 #endif
 
-#define MICRO_CFAR_MODE_SINGLE_SIDE    (0)
-#define MICRO_CFAR_MODE_BOTH_SIDE      (1)
+typedef enum {
+	BOARD_MRS6130_P1806 = 0,
+	BOARD_MRS6130_P1812,
+	BOARD_MRS6240_P2512,
+	BOARD_MRS6241_P2828_M62,
+	BOARD_MRS6241_P2840_M81,
+	BOARD_MRS7241_P2828_M62,
+	BOARD_MRS7241_P2840_M81,
+	BOAED_INVALID
+} PSIC_Board_e;
+
 
 #define PRESENCE_POINT_MAX         256  //default presence point num;
+
+/* Config the processing method for presence point cloud, 0--> SNR THRESHOLD, 1--> CFAR
+ * SNR THRESHOLD method: filter point clouds based on signal-to-noise ratio and threshold.
+ * CFAR method: filter point clouds using the CFAR method provided by PSIC.
+ * */
+#define MICRO_PROCESS_SNR_THRESHOLD_METHOD	(0)
+#define MICRO_PROCESS_CFAR_METHOD			(1)
+
+#ifndef CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD
+#define CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD            MICRO_PROCESS_CFAR_METHOD   /* default SNR_THRESHOLD method */
+#endif
+
+#if (CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD != MICRO_PROCESS_SNR_THRESHOLD_METHOD) && (CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD != MICRO_PROCESS_CFAR_METHOD)
+#error "CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD must be 0 or 1"
+#endif
+
+#if CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD == MICRO_PROCESS_CFAR_METHOD
+#define MICRO_CFAR_MODE_SINGLE_SIDE    (0)
+#define MICRO_CFAR_MODE_BOTH_SIDE      (1)
 
 /* Config micro cfar mode, 1 --> single side mode; 0 --> both side mode
  * single side mode：This mode is suitable for simple environments where the area close to the target is open and unobstructed.
@@ -33,12 +61,13 @@ extern "C" {
  * */
 
 #ifndef CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE
-#define CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE								MICRO_CFAR_MODE_SINGLE_SIDE
+#define CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE								MICRO_CFAR_MODE_BOTH_SIDE
 #endif
 
 #if (CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE != MICRO_CFAR_MODE_SINGLE_SIDE) && (CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE != MICRO_CFAR_MODE_BOTH_SIDE)
 #error "CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE must be 0 or 1"
 #endif
+#endif /* #if CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD == MICRO_PROCESS_CFAR_METHOD */
 
 #ifndef CONFIG_MMW_PRESENCE_POINT_MAX
 #define CONFIG_MMW_PRESENCE_POINT_MAX										PRESENCE_POINT_MAX
@@ -56,10 +85,6 @@ extern "C" {
 #define MICRO_CA_CFAR_GUARD_RANGE_MM	400   //400 mm
 #define MICRO_CA_CFAR_RANGE_RES_MM_MIN_LIM		(MICRO_CA_CFAR_GUARD_RANGE_MM / (MICRO_CA_CFAR_NOISE_LEN - 6))
 
-/* for the detection of range bins influenced by HPF,
- * the snr threshold is increased by extra 0dB.
- * */
-#define MICRO_CFAR_EXTRA_SNR_TH_DB		0 
 
 typedef struct micro_ca_cfar_param {
 	/* CA_CFAR Param */
@@ -67,14 +92,20 @@ typedef struct micro_ca_cfar_param {
 	uint16_t	guard_len;
 	uint16_t	win_len;
 	uint16_t	hw_hpf_suppressed_range_bin_len;
+	uint16_t	*linear_th_buffer_target;
+	uint16_t	*linear_th_buffer_no_target;
 	
-#if CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE == MICRO_CFAR_MODE_SINGLE_SIDE
-	int16_t	noise_len_segment1;
-	int16_t	noise_len_segment2;
-#elif CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE == MICRO_CFAR_MODE_BOTH_SIDE
-	uint16_t	noise_len;
-	uint16_t	half_win_len;
-#endif
+	union {
+        struct {
+            int16_t noise_len_segment1;
+            int16_t noise_len_segment2;
+        };		// MICRO_CFAR_MODE_SINGLE_SIDE
+        struct {
+            int16_t noise_len;
+            int16_t half_win_len;
+        };		// MICRO_CFAR_MODE_BOTH_SIDE
+    };
+	
 }MicroCfarPARAM_t;
 
 typedef struct{
@@ -85,13 +116,22 @@ typedef struct{
 	uint8_t micro_dop_gain_log2;
 } MicroProcessParam_t;
 
+typedef struct{ 
+	float alpha;
+    int16_t first_clip_margin_db;     //q4
+    int16_t second_clip_margin_db;    //q4
+    int16_t two_level_diff_db;        //q4
+    uint8_t scene_type;             
+}MicroSceneJudgeParam_t;
 
 typedef struct _presence_pointcloud_t {
 	uint32_t    frame_num;      /* micro frame counter */
 	uint16_t    presence_points_num;
+	uint8_t     cfar_stationary;
 	uint8_t     frame_div_idx;
 	uint8_t     frame_div_cnt;
-	
+	/* Scene judge param */
+	MicroSceneJudgeParam_t mscene_param;
 	/* Process param */
 	MicroProcessParam_t mprocess_param;
 	/* CFAR Param */
@@ -107,8 +147,10 @@ typedef struct _presence_pointcloud_t {
 	
 	const int16_t  *hanning_win;
 	void           *proc_bufs;      /* buffer for mdop fft and dbf */
-	uint32_t	   *proc_abs_bufs;
-	uint16_t	   *proc_cfar_th_bufs;	/* buffer for linear threshold, U16Q4 */
+	uint32_t	   *proc_abs_bufs;			/* U32Q15 */
+	uint32_t	   *proc_limit_abs_bufs;	/* U32Q15 */
+	uint16_t	   *proc_cfar_th_bufs;	/* pointer points to buffer for linear threshold, U16Q4 */
+	uint8_t 	board_type;
 } MPC_CTRL;
 
 /* initial and reset */

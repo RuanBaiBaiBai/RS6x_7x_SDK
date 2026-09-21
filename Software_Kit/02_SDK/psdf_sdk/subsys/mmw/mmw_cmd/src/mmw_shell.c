@@ -1251,9 +1251,17 @@ static int cmd_mmw_calib(Shell *shell, int argc, char *argv[])
 
 	if (argc > 1) {
 		if (!strcmp(argv[1], "load")) {
+		#if (CONFIG_MMW_CALIB_CHIRP_STORAGE)
 			mmwc_set_chirp_calib_data();
+		#else
+			return -EINVAL;
+		#endif
 		} else if (!strcmp(argv[1], "save")) {
+		#if (CONFIG_MMW_CALIB_CHIRP_STORAGE)
 			mmwc_save_chirp_calib_data();
+		#else
+			return -EINVAL;
+		#endif
 		} else if (!strcmp(argv[1], "ant")) {
             uint32_t chip_info[MMW_CALIB_DATA_LEN>>2] = { 0 };
 
@@ -1540,7 +1548,11 @@ ShellCommand mmwGroup[] = {
     SHELL_CMD_ITEM(noise, cmd_mmw_noise, "[est]"),
     SHELL_CMD_ITEM(tone, cmd_mmw_tone, "<start/stop> [txid] [freq_MHz]"),
     SHELL_CMD_ITEM(rx_gain, cmd_mmw_rx_gain, "<rf/dig> <ant_id> <gain>"),
+#if (CONFIG_MMW_CALIB_CHIRP_STORAGE)
     SHELL_CMD_ITEM(calib, cmd_mmw_calib, "<chirp/load/save/ant>"),
+#else
+	SHELL_CMD_ITEM(calib, cmd_mmw_calib, "<chirp/ant>"),
+#endif
     SHELL_CMD_ITEM(hpf, cmd_mmw_ana_hpf_bw, "<ant_id> <bw>"),
     SHELL_CMD_ITEM(dbg, cmd_mmw_dbg, "[<type> [tag]]"),
     SHELL_CMD_ITEM(dop_fft, cmd_mmw_dop_fft, "<off/on>"),

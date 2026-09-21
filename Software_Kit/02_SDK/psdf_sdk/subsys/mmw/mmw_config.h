@@ -78,6 +78,14 @@ extern "C" {
 #define CONFIG_MMW_CTRL_SRAM                            0
 #endif
 
+/* 1 : support mmw chirp calibration data storaged in flash
+ *     for ULP mode such as button cell power.
+ * 0 : non-support mmw chirp calibration data storaged in flash.
+ */
+#ifndef CONFIG_MMW_CALIB_CHIRP_STORAGE
+#define CONFIG_MMW_CALIB_CHIRP_STORAGE                  0
+#endif
+
 #ifndef CONFIG_MMW_IMG_NAME
 #if (CONFIG_MMW_MOTION_SENSOR == 1)
 #if (CONFIG_MMW_CTRL_SRAM == 1)

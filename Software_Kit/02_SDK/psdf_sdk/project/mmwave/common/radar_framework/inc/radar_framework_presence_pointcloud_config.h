@@ -42,8 +42,12 @@
  /**
   * In subfunction macro 'CONFIG_MMW_MOTION_POINT_CLOUD', user can configure following macros:
   *
+  *   - CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD (default 1, MICRO_PROCESS_CFAR_METHOD)
+  *		See 'mmw_app_micro_pointcloud.h' for details. 
+  * 
   *   - CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE (default 0, MICRO_CFAR_MODE_SINGLE_SIDE)
   * 	MICRO_CFAR_MODE_SINGLE_SIDE will cost less heap memory and faster computation time, which is recommanded.
+  * 	The value of this macro take effect only in CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD is 1.
   *     See 'mmw_app_micro_pointcloud.h' for details.
   *
   *   - CONFIG_MMW_PRESENCE_POINT_CLOUD_RANGE_DEC (default 2)
@@ -67,8 +71,14 @@
   */
 #if CONFIG_MMW_PRESENCE_POINT_CLOUD
 
+#ifndef CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD
+#define CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD            1   /* default cfar method */
+#endif
+
+#if CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD == 1
 #ifndef CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE
-#define CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE                        0   /* default MICRO_CFAR_MODE_SINGLE_SIDE mode */
+#define CONFIG_MMW_MICRO_POINT_CLOUD_CFAR_MODE                        1   /* default MICRO_CFAR_MODE_SINGLE_SIDE mode */
+#endif
 #endif
 
 /* Config the maximun number of point clouds.if the number of point cloud results exceedsthe value,the subsequent target will be discarded. */
@@ -135,7 +145,11 @@
 #define PRESENCE_RANGE_BIN_NUM_DECM                  (CONFIG_MMW_PRESENCE_RANGE_BIN_NUM / CONFIG_MMW_PRESENCE_POINT_CLOUD_RANGE_DEC + 1)
 #define HEAP_SIZE_PRESENCE_CUBE                      (PRESENCE_RANGE_BIN_NUM_DECM * RADAR_FRAMEWORK_MIMO_RX_NUM * (PRESENCE_INTERVAL_NUM + 1) * 4)
 #define HEAP_SIZE_PRESENCE_CHIRP                     (RADAR_FRAMEWORK_MIMO_RX_NUM * (PRESENCE_INTERVAL_NUM + 1) * 4)
-#define HEAP_SIZE_PRESENCE_STORE                     ((PRESENCE_RANGE_BIN_NUM_DECM * 6) + (PRESENCE_DOP_FFT_LEN * (RADAR_FRAMEWORK_MIMO_RX_NUM + 1)) * HEAP_SIZE_PRESENCE_BASE)
+#if CONFIG_MMW_PRESENCE_POINT_CLOUD_PROCESS_METHOD == 1
+#define HEAP_SIZE_PRESENCE_STORE                     ((PRESENCE_DOP_FFT_LEN * RADAR_FRAMEWORK_MIMO_RX_NUM * HEAP_SIZE_PRESENCE_BASE) + ((2 * PRESENCE_DOP_FFT_LEN + 1)) * (PRESENCE_RANGE_BIN_NUM_DECM * 4))
+#else
+#define HEAP_SIZE_PRESENCE_STORE                     (4 * 3 * PRESENCE_DOP_FFT_LEN * RADAR_FRAMEWORK_MIMO_RX_NUM)
+#endif
 #define HEAP_SIZE_PRESENCE							 ((HEAP_SIZE_PRESENCE_CALCULATION_RESULT) + (HEAP_SIZE_PRESENCE_CUBE) + (HEAP_SIZE_PRESENCE_CHIRP) + (HEAP_SIZE_PRESENCE_STORE) + HEAP_SIZE_PRESENCE_REPORT)
 
 /****************** CHECKPOINT OF CONFIG_MMW_PRESENCE_POINT_CLOUD ******************/

@@ -227,9 +227,6 @@ typedef struct {
 #define HIF_MSG_ID_MRS2_RANGE_DATA              0xC9
 #define HIF_MSG_ID_MOTION_SENSOR_LP_TAR_DATA1   0xCA
 #define HIF_MSG_ID_MOTION_SENSOR_LP_TAR_DATA2   0xCB
-#define HIF_MSG_ID_HEARTBEAT_DATA               0xFE
-
-/* 0xC8 ~ 0xCF unused */
 
 /* 0xD0 ~ 0xDF undefined */
 /* 0xE0 ~ 0xEF undefined */
@@ -240,7 +237,7 @@ typedef struct {
 #define HIF_MSG_ID_PERF_INFO                    0xF2  /**< Performance report of modules */
 #define HIF_MSG_ID_DBG_PWR_CONSUME              0xF3  /**< Power Consume report of modules */
 #define HIF_MSG_ID_SYSTEM_INFO                  0xF4  /**< System state periodic report */
-/* 0xF5 ~ 0xFE undefined */
+#define HIF_MSG_ID_HEARTBEAT_DATA               0xFE
 
 #define HIF_MSG_ID_STARTUP                      0xFF  /**< Device StartUp Message ID */
 /** @}*/ /* MMW_Message_ID */

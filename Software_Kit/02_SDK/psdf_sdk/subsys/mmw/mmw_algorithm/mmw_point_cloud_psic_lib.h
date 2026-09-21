@@ -49,6 +49,7 @@ extern "C" {
 #include "mmw_ctrl.h"
 #include "common.h"
 #include "mmw_alg_pointcloud_typedef.h"
+#include "mmw_app_micro_pointcloud.h"
 
 /* Exported types.
  * ----------------------------------------------------------------------------
@@ -263,6 +264,55 @@ extern int mmw_psic_dc_suppression_update(void);
 extern float psic_lib_sinf(float degree_value);
 
 extern float psic_lib_cosf(float degree_value);
+
+/* ------------- PSIC MICRO CFAR PROCESS FUNCTIONS ------------- */
+/**
+ * @brief This function performs micro CA-CFAR processing on the presence point clouds using the single-sided CFAR method, 
+ * 		  and outputs the processed point clouds.
+ * 
+ * 		  Make sure mmw_psic_micro_cfar_mem_init() has been called before invoking this function.
+ * 
+ * @param g_mpc_ctrl, This structure pointer contains the parameters required for CFAR processing.
+ * @param range_idx_start is the starting range index for CFAR detection.
+ * @param range_idx_end is the ending range index for CFAR detection.
+ * @param ptr_mpc_buffer, This pointer points to the point cloud result after CFAR processing. 
+ * 		  The pointer type is defined in the file mmw_alg_pointcloud_type.h.
+ * 
+ * @return MMWave error code (defined MMW_ERR_CODE_*), Zero on success.
+ * @note   The maximum number of point clouds returned by this function is defined by the macro CONFIG_MMW_PRESENCE_POINT_MAX, 
+ * 		   which can be configured in the file mmw_app_micro_pointcloud.h
+ * 		   
+ * */
+extern int mmw_psic_micro_cfar_doa_single_side(MPC_CTRL* g_mpc_ctrl, uint16_t range_idx_start, uint16_t range_idx_end,  MmwMicroDetectData_t* ptr_mpc_buffer);
+
+/**
+ * @brief This function performs micro CA-CFAR processing on the presence point clouds using the both-sided CFAR method, 
+ * 		  and outputs the processed point clouds.
+ * 
+ * 		  Make sure mmw_psic_micro_cfar_mem_init() has been called before invoking this function.
+ * 
+ * @param g_mpc_ctrl, This structure pointer contains the parameters required for CFAR processing.
+ * @param range_idx_start is the starting range index for CFAR detection.
+ * @param range_idx_end is the ending range index for CFAR detection.
+ * @param ptr_mpc_buffer, This pointer points to the point cloud result after CFAR processing. 
+ * 		  The pointer type is defined in the file mmw_alg_pointcloud_type.h.
+ * 
+ * @return MMWave error code (defined MMW_ERR_CODE_*), Zero on success.
+ * @note   The maximum number of point clouds returned by this function is defined by the macro CONFIG_MMW_PRESENCE_POINT_MAX, 
+ * 		   which can be configured in the file mmw_app_micro_pointcloud.h
+ * */
+extern int mmw_psic_micro_cfar_doa_both_side(MPC_CTRL* g_mpc_ctrl, uint16_t range_idx_start, uint16_t range_idx_end,  MmwMicroDetectData_t* ptr_mpc_buffer);
+
+/**
+ * @brief This function allocates memory for the parameters required by the micro CA-CFAR.
+ * @return MMWave error code (defined MMW_ERR_CODE_*), Zero on success.
+ * */
+extern int mmw_psic_micro_cfar_mem_init(MPC_CTRL* g_mpc_ctrl);
+
+/**
+ * @brief This function frees the memory allocated for the micro CA-CFAR parameters.
+ * */
+extern void mmw_psic_micro_cfar_mem_deinit(MPC_CTRL* g_mpc_ctrl);
 
 #ifdef __cplusplus
 }

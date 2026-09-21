@@ -2012,12 +2012,13 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
                 /* Start sending timeot */
                 hifCtrl.timerState &= HIF_TIMER_CMDRSP_MSK;
                 hifCtrl.timerState |= HIF_TIMER_CMDRSP_SEND;
+                hifCtrl.timerState |= HIF_TIMER_CMDRSP_SLEEP;
                 *pCmdRspTime = currentTime;
                 cmdTimeout = hifCfg.sendFrameTo;
 
                 /* Lock sleep mode until sleep timeout is completed */
                 hifCtrl.pmState |= HIF_PM_STATE_CMDRSP_PREVENT;
-                hifCtrl.pmState &= ~HIF_PM_STATE_WAKE_REQ;
+                hifCtrl.pmState |= HIF_PM_STATE_WAKE_REQ;
 
                 status = hif_MSG_WakeupResp();
 
@@ -2029,6 +2030,7 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
 
                     /* Unlock sleep mode */
                     hifCtrl.pmState &= ~HIF_PM_STATE_CMDRSP_PREVENT;
+                    hifCtrl.pmState &= ~HIF_PM_STATE_WAKE_REQ;
 
                     hif_MSG_Recv_Start_Unlock();
                     hif_MSG_Recv_Start();
@@ -2078,11 +2080,6 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
                     status = HIF_MsgResp(pCmdMsg, 0, recvStatus);
                 }
 
-                if (hifCtrl.event & HIF_EVENT_SLEEP) {
-                    hif_EVENT_Clr(HIF_EVENT_SLEEP);
-                    hifCtrl.pmState |= HIF_PM_STATE_SLEEP_REQ;
-                }
-
                 if (status != HIF_ERRCODE_SUCCESS) {
                     hifCtrl.fault = 4;
 
@@ -2090,7 +2087,7 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
                     hif_MSG_Recv_Start();
 
                     /* Start sleep timeot */
-                    hifCtrl.timerState &= HIF_TIMER_CMDRSP_MSK;
+                    // hifCtrl.timerState &= HIF_TIMER_CMDRSP_MSK;
                     *pCmdRspTime = currentTime;
                     /* unlock the report */
                     hifCtrl.reportPrevent &= ~HIF_REPORT_PAUSE;
@@ -2101,7 +2098,19 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
                     }
                     hifCtrl.pmState &= ~HIF_PM_STATE_CMDRSP_PREVENT;
 
+                    if (hifCtrl.event & HIF_EVENT_SLEEP) {
+                        hif_EVENT_Clr(HIF_EVENT_SLEEP);
+                    }
+
                     break;
+                }
+
+
+                if (hifCtrl.event & HIF_EVENT_SLEEP) {
+                    hif_EVENT_Clr(HIF_EVENT_SLEEP);
+                    hifCtrl.pmState |= HIF_PM_STATE_SLEEP_REQ;
+                    hifCtrl.pmState &= ~HIF_PM_STATE_WAKE_REQ;
+                    hifCtrl.timerState &= ~HIF_TIMER_CMDRSP_SLEEP;
                 }
 
                 /* The poll command does not response */
@@ -2111,8 +2120,8 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
                     hif_EVENT_Clr(HIF_EVENT_RSP_SKIP);
 
                     /* Start sleep timeot */
-                    hifCtrl.timerState &= HIF_TIMER_CMDRSP_MSK;
-                    *pCmdRspTime = currentTime;
+                    // hifCtrl.timerState &= HIF_TIMER_CMDRSP_MSK;
+                    // *pCmdRspTime = currentTime;
                     /* unlock the report */
                     hifCtrl.reportPrevent &= ~HIF_REPORT_PAUSE;
                     /* Lock sleep mode until sleep timeout is completed */
@@ -2169,11 +2178,9 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
         }
 
     } else if (hifCtrl.event & HIF_EVENT_RSP_SEND_DONE) {
-        //hifCtrl.event &= ~HIF_EVENT_RSP_SEND_DONE;
         hif_EVENT_Clr(HIF_EVENT_RSP_SEND_DONE);
 
-        /* stop response send */
-
+        /* response to sleep-cmd(0x05) is sent done */
         if (hifCtrl.pmState & HIF_PM_STATE_SLEEP_REQ) {
             /* stop sleep timeot */
             hifCtrl.timerState &= HIF_TIMER_CMDRSP_MSK;
@@ -2182,11 +2189,12 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
             /* unlock the report */
             hifCtrl.reportPrevent &= ~HIF_REPORT_PAUSE;
             /* Unlock sleep mode */
-            hifCtrl.pmState &= ~(HIF_PM_STATE_CMDRSP_PREVENT | HIF_PM_STATE_SLEEP_REQ);
+            hifCtrl.pmState &= ~(HIF_PM_STATE_CMDRSP_PREVENT | HIF_PM_STATE_SLEEP_REQ | HIF_PM_STATE_WAKE_REQ);
 
             if (hifCfg.reportMode == HIF_REPORT_MODE_ACTIOVE) {
                 hifCtrl.reportPrevent &= ~HIF_REPORT_PREVENT;
             }
+        /* other response(79 79 79 79 and other cmds' response) is sent done */
         } else {
             /* Start sleep timeot */
             hifCtrl.timerState &= HIF_TIMER_CMDRSP_MSK;
@@ -2195,8 +2203,11 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
             cmdTimeout = hifCfg.sleepTo;
             /* unlock the report */
             hifCtrl.reportPrevent &= ~HIF_REPORT_PAUSE;
+
+            hifCtrl.pmState &= ~HIF_PM_STATE_CMDRSP_PREVENT;
             /* Lock sleep mode until sleep timeout is completed */
-            hifCtrl.pmState |= HIF_PM_STATE_CMDRSP_PREVENT;
+            hifCtrl.pmState |= HIF_PM_STATE_WAKE_REQ;
+
             if (hifCfg.reportMode == HIF_REPORT_MODE_ACTIOVE) {
                 hifCtrl.reportPrevent &= ~HIF_REPORT_PREVENT;
             }
@@ -2204,7 +2215,7 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
     } else {
 
 
-        if (hifCtrl.event & HIF_EVENT_WAKEUP) {
+        if (hifCtrl.event & HIF_EVENT_WAKEUP) { /* */
             //hifCtrl.event &= ~HIF_EVENT_WAKEUP;
             hif_EVENT_Clr(HIF_EVENT_WAKEUP);
 
@@ -2228,6 +2239,7 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
                 hif_MSG_Recv_Start_Unlock();
                 hif_MSG_Recv_Start();
 
+                /* "79 79 79 79" and sleep-cmd(0x05)'s response is sent timeout */
                 if (hifCtrl.pmState & (HIF_PM_STATE_SLEEP_REQ | HIF_PM_STATE_WAKE_REQ)) {
                     /* stop sleep timeot */
                     hifCtrl.timerState &= HIF_TIMER_CMDRSP_MSK;
@@ -2238,6 +2250,7 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
                     /* Unlock sleep mode */
                     hifCtrl.pmState &= ~(HIF_PM_STATE_CMDRSP_PREVENT | HIF_PM_STATE_SLEEP_REQ | HIF_PM_STATE_WAKE_REQ);
 
+                /* other cmds' response is sent timeout */
                 } else {
                     /* Start sleep timeot */
                     hifCtrl.timerState &= HIF_TIMER_CMDRSP_MSK;
@@ -2246,8 +2259,14 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
                     cmdTimeout = hifCfg.sleepTo;
                     /* unlock the report */
                     hifCtrl.reportPrevent &= ~HIF_REPORT_PAUSE;
+
+                    hifCtrl.pmState &= ~HIF_PM_STATE_CMDRSP_PREVENT;
                     /* Lock sleep mode until sleep timeout is completed */
-                    hifCtrl.pmState |= HIF_PM_STATE_CMDRSP_PREVENT;
+                    hifCtrl.pmState |= HIF_PM_STATE_WAKE_REQ;
+                }
+
+                if (hifCfg.reportMode == HIF_REPORT_MODE_ACTIOVE) {
+                    hifCtrl.reportPrevent &= ~HIF_REPORT_PREVENT;
                 }
             } else {
                 cmdTimeout = hifCfg.sendFrameTo - cmdTimeout;
@@ -2265,7 +2284,7 @@ __hif_sram_text static OSI_Time_t hif_TASK_CmdRsp(OSI_Time_t currentTime, OSI_Ti
                 /* unlock the report */
                 hifCtrl.reportPrevent &= ~HIF_REPORT_PAUSE;
                 /* Unlock sleep mode */
-                hifCtrl.pmState &= ~HIF_PM_STATE_CMDRSP_PREVENT;
+                hifCtrl.pmState &= ~HIF_PM_STATE_WAKE_REQ;
 
                 if (hifCfg.reportMode == HIF_REPORT_MODE_ACTIOVE) {
                     hifCtrl.reportPrevent &= ~HIF_REPORT_PREVENT;

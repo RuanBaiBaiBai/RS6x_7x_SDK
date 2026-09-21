@@ -350,6 +350,7 @@ void Mmw_Report_Handle_FreeAll(DEV_HANDLE DevHdl)
 		Mmw_Report_Handle_Set_General(DevHdl, NULL, NULL, NULL, 0, HIF_MSG_ID_MOTION_SENSOR_LP_TAR_DATA1, NULL);
 		Mmw_Report_Handle_Set_General(DevHdl, NULL, NULL, NULL, 0, HIF_MSG_ID_MOTION_SENSOR_LP_TAR_DATA2, NULL);
 		Mmw_Report_Handle_Set_General(DevHdl, NULL, NULL, NULL, 0, HIF_MSG_ID_HEARTBEAT_DATA, NULL);
+		Mmw_Report_Handle_Set_General(DevHdl, NULL, NULL, NULL, 0, HIF_MSG_ID_STARTUP, NULL);
 	}
 }
 
@@ -503,6 +504,15 @@ int Mmw_FE_Heartbeat_Data_Parse(Heartbeat_Data_t *heartbeat_out, uint8_t *data, 
     } while (offset < data_len);
 
     return HOST_ERRCODE_SUCCESS;
+}
+
+int Mmw_FF_Startup_Handle_Set(DEV_HANDLE DevHdl, Report_CB cb, void *cb_arg)
+{
+    if (Host_DevHdl_IsValid(DevHdl)) {
+        return Mmw_Report_Handle_Set_General(DevHdl, cb, cb_arg, NULL, 0,
+                        HIF_MSG_ID_STARTUP, &Mmw_Report_General_Process);
+    }
+    return HOST_ERRCODE_INVALID_HANDLE;
 }
 
 

@@ -129,6 +129,15 @@ extern "C" {
  * ------------------------------------------------------------------------------------------------
  */
 #if (CFG_HOST_PORT_LOG_EN == 1)
+/**
+ * @brief Print log.
+ *
+ * @param `const char *` The string to be format.
+ *
+ * @param `...` The param to be format.
+ *
+ * @retval The number of bytes printed 
+ */
 int host_log_print(const char *, ...);
 #endif  /* CFG_HOST_PORT_LOG_EN == 1 */
 

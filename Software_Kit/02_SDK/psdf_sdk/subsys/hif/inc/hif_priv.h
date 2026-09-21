@@ -97,8 +97,8 @@ typedef struct {
 
     uint8_t                     startupState;
 
-        #define HIF_TIMER_CMDRSP_SEND           0x01
-        #define HIF_TIMER_CMDRSP_SLEEP          0x02
+        #define HIF_TIMER_CMDRSP_SEND           0x01        /*< Repsonse-frame send timeout timer is activating */
+        #define HIF_TIMER_CMDRSP_SLEEP          0x02        /*< Timeout timer to sleep is activating */
         #define HIF_TIMER_CMDRSP_MSK            0xF0
 
         #define HIF_TIMER_REPORT_SEND           0x10
@@ -107,12 +107,14 @@ typedef struct {
         #define HIF_TIMER_REPORT_MSK            0x0F
     uint8_t                     timerState;
 
-        #define HIF_PM_STATE_CMDRSP_PREVENT     0x10
+        #define HIF_PM_STATE_CMDRSP_PREVENT     0x10        /*< Prevent os(pm) sleep until response frame is sent done */
         #define HIF_PM_STATE_REPORT_PREVENT     0x20
         #define HIF_PM_STATE_APP_PREVENT        0x40
         #define HIF_PM_STATE_PREVENT_MSK        0xF0
         #define HIF_PM_STATE_SLEEP_REQ          0x01
-        #define HIF_PM_STATE_WAKE_REQ           0x02
+        #define HIF_PM_STATE_WAKE_REQ           0x02        /*< Prevent os(pm) sleep until timeout \
+                                                                after "55 FF 55 FF" is received or \
+                                                                response is sent done */
     uint8_t                     pmState;
 
         #define HIF_REPORT_STATE_IDLE               0

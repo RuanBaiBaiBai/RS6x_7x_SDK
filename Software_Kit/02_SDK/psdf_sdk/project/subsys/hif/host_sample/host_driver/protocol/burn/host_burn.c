@@ -669,16 +669,24 @@ int HOST_BURN_Download_Image(void *img, uint32_t len, host_burn_device_store_typ
             write_size = len + HOST_BURN_FLASH_PAGE_SIZE;
         }
         write_size &= ~HOST_BURN_FLASH_PGAE_MSK;
-        for (uint32_t addr = 0; addr < write_size; addr += HOST_BURN_FLASH_WRITE_SIZE) {
+        uint32_t read_size = HOST_BURN_FLASH_WRITE_SIZE;
+        for (uint32_t addr = 0; addr < write_size; addr += read_size) {
+            read_size = HOST_BURN_FLASH_WRITE_SIZE;
+            uint32_t page_num  = HOST_BURN_FLASH_WRITE_SIZE / HOST_BURN_FLASH_PAGE_SIZE;
+            if (addr + read_size > len) {
+                read_size = len - addr;
+                page_num  = (read_size + HOST_BURN_FLASH_PAGE_SIZE - 1) / HOST_BURN_FLASH_PAGE_SIZE;
+                host_os_memset(temp_buffer + read_size, 0xFF, page_num * HOST_BURN_FLASH_PAGE_SIZE - read_size);
+            }
             HOST_LOG_INF("----[%2d %%]  0x%08X %dKB 0x%08X\n", (addr * 100) / write_size, 
-                write_size, (HOST_BURN_FLASH_WRITE_SIZE / 1024), addr);
-            status = host_store_read(img, addr, temp_buffer, HOST_BURN_FLASH_WRITE_SIZE);
+                write_size, (read_size / 1024), addr);
+            status = host_store_read(img, addr, temp_buffer, read_size);
             if (status != HOST_ERRCODE_SUCCESS) {
                 HOST_LOG_ERR("\n\tread fail %d %08X\n", status, addr);
                 break;
             }
             do {
-                status = host_burn_flash_write(addr, HOST_BURN_FLASH_WRITE_SIZE / HOST_BURN_FLASH_PAGE_SIZE, temp_buffer);
+                status = host_burn_flash_write(addr, page_num, temp_buffer);
                 if (status != HOST_ERRCODE_SUCCESS) {
                     err_times++;
                     host_os_delayms(10);
@@ -693,7 +701,7 @@ int HOST_BURN_Download_Image(void *img, uint32_t len, host_burn_device_store_typ
 #if ((CFG_HOST_BURN_DOWNLOAD_READ_CHECK_EN) && (CFG_HOST_BURN_FLASH_READ_EN))
             if (busType == LLC_BUS_TYPE_UART) {
                 do {
-                    status = host_burn_flash_read(addr, HOST_BURN_FLASH_WRITE_SIZE / HOST_BURN_FLASH_PAGE_SIZE, temp_buffer_read);
+                    status = host_burn_flash_read(addr, page_num, temp_buffer_read);
                     if (status != HOST_ERRCODE_SUCCESS) {
                         err_times++;
                         host_os_delayms(10);
@@ -705,7 +713,7 @@ int HOST_BURN_Download_Image(void *img, uint32_t len, host_burn_device_store_typ
                     HOST_LOG_ERR("\n\tread fail %d %08X\n", status, addr);
                     break;
                 }
-                if (host_os_memcmp(temp_buffer, temp_buffer_read, HOST_BURN_FLASH_WRITE_SIZE)) {
+                if (host_os_memcmp(temp_buffer, temp_buffer_read, read_size)) {
                     HOST_LOG_ERR("\n\tdata not correct\n");
                     status = HOST_ERRCODE_STATE;
                     break;
@@ -718,7 +726,7 @@ int HOST_BURN_Download_Image(void *img, uint32_t len, host_burn_device_store_typ
             HOST_LOG_ERR("download flash fail\n");
             break;
         } else {
-            HOST_LOG_INF("----[100 %%] 0x%08X %dKB 0x%08X\n", write_size, (HOST_BURN_FLASH_WRITE_SIZE / 1024), write_size);
+            HOST_LOG_INF("----[100 %%] 0x%08X %dKB 0x%08X\n", write_size, (read_size / 1024), write_size);
         }
     } while (0);
 

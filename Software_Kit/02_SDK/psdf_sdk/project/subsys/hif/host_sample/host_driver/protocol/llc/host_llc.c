@@ -481,8 +481,6 @@ LLC_CALLBACK_IRQ static void llc_interrupt_handle(void *arg)
         }
     } else if (device->dev.notify_type == HOST_BUS_DEVICE_NOTIFY_TYPE_COM_IRQ_THREAD) {
         if (handle->notify_callback != NULL && handle->rx_cache != NULL && handle->rx_cache_size > 0) {
-            // notify TL to recv data
-            handle->notify_callback(NULL, 0, handle->notify_arg);
             // recv till empty or recv fifo full
             handle->rx_cache_data_len = 0;
             handle->rx_cache_data_offset = 0;
@@ -490,6 +488,8 @@ LLC_CALLBACK_IRQ static void llc_interrupt_handle(void *arg)
             if (status > 0) {
                 handle->rx_cache_data_len = status;
             }
+            // notify TL to recv data
+            handle->notify_callback(NULL, 0, handle->notify_arg);
         } else {
             if (handle->notify_callback == NULL) {
                 HOST_LOG_ERR("dev(%p) not regist notify callback!\n", arg);
@@ -509,6 +509,17 @@ LLC_CALLBACK_IRQ static void llc_interrupt_handle(void *arg)
  * ------------------------------------------------------------------------------------------------
  */
 // from porting, defined by productor
+/**
+ * @brief Obtain com_ops for different buses.
+ *
+ * @note This function must be defined, otherwise the bus can not be controlled.
+ *
+ * @param type The bus type.
+ *
+ * @param id The bus id.
+ *
+ * @retval The bus com_ops.
+ */
 extern host_com_ops_t *porting_get_com_ops(host_bus_type_t type, uint8_t id);
 
 
@@ -1056,10 +1067,8 @@ uint32_t LLC_Recv(LLC_HANDLE dev, uint8_t *buffer, uint32_t size, uint32_t timeo
             }
             if ((handle->rx_cache != NULL && handle->rx_cache_size > 0)
                 && (handle->rx_cache_data_len > 0 && handle->rx_cache_data_len <= handle->rx_cache_size)
-                && (handle->rx_cache_data_offset <= handle->rx_cache_data_len)) {
-                if (handle->rx_cache_data_offset == handle->rx_cache_data_len) {
-                    // nothing to do
-                } else if (handle->rx_cache_data_len - handle->rx_cache_data_offset > size) {
+                && (handle->rx_cache_data_offset < handle->rx_cache_data_len)) {
+                if (handle->rx_cache_data_len - handle->rx_cache_data_offset > size) {
                     host_os_memcpy(&buffer[recv_num], &handle->rx_cache[handle->rx_cache_data_offset], size);
                     recv_num += size;
                     handle->rx_cache_data_offset += size;
@@ -1070,8 +1079,6 @@ uint32_t LLC_Recv(LLC_HANDLE dev, uint8_t *buffer, uint32_t size, uint32_t timeo
                     recv_num += handle->rx_cache_data_len - handle->rx_cache_data_offset;
                     handle->rx_cache_data_offset += handle->rx_cache_data_len - handle->rx_cache_data_offset;
                 }
-            } else {
-                break;
             }
         }
         // recv from com

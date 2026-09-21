@@ -580,13 +580,21 @@ static uint8_t mmw_cfg_calib_handler(uint8_t *data)
 	calib_msg.calib_type = data[1];
 	HIF_DBG("subId:0x%02x arg[0]:%d", calib_msg.sub_id, calib_msg.calib_type);
 	if(calib_msg.calib_type == type_load) {
+	#if (CONFIG_MMW_CALIB_CHIRP_STORAGE)
 		if(mmwc_set_chirp_calib_data()) {
 			ret = HIF_CMD_STATUS_IO;
 		}
+	#else
+		ret = HIF_CMD_STATUS_UNSUPPORT;
+	#endif
 	} else if(calib_msg.calib_type == type_save) {
+	#if (CONFIG_MMW_CALIB_CHIRP_STORAGE)
 		if(mmwc_save_chirp_calib_data()) {
 			ret = HIF_CMD_STATUS_IO;
 		}
+	#else
+		ret = HIF_CMD_STATUS_UNSUPPORT;
+	#endif
 	} else if (calib_msg.calib_type == type_ant) {
 			memcpy(calib_msg.chip_info, &data[4], sizeof(calib_msg.chip_info));
 

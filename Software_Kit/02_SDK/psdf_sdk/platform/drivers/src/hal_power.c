@@ -58,6 +58,12 @@
 
 #include "irq.h"
 
+#ifndef CONFIG_POWER_LOG_LEVEL
+#define CONFIG_POWER_LOG_LEVEL          LEVEL_DIS
+#endif
+
+#define LOG_MODULE                      "PWR"
+#define LOG_LEVEL                       CONFIG_POWER_LOG_LEVEL
 #include "log.h"
 /* Private typedef.
  * ----------------------------------------------------------------------------
@@ -510,12 +516,12 @@ uint32_t power_ReadV13(void)
 {
     #define GPADC_CH_S8         (8)
     static bool b_adc_config = false;
-    uint32_t ch_val, sum_val = 0;
+    uint32_t ch_val = 0;
     bool need_restore = true;
-    uint32_t adc_trim06 = 2202;
-    uint32_t adc_trim24 = 8985;
+//    uint32_t adc_trim06 = 2202;
+//    uint32_t adc_trim24 = 8985;
 
-#if CONFIG_DRIVER_EFUSE
+#if 0//CONFIG_DRIVER_EFUSE
     int status = 0;
     status = HAL_EFUSE_GetGpadcTrim(pEfuseDevice, EFUSE_GPADC_VOLT_06, (uint16_t *)&adc_trim06);
     if (status == 0 && adc_trim06 != 0) {
@@ -550,6 +556,7 @@ uint32_t power_ReadV13(void)
        need_restore = true;
     }
 
+#if 0
     for (int i = 0; i < 16; i++) {
         LL_GPADC_SetChConfig(GPADC_CH_S8);
         ch_val = LL_GPADC_Polling_GetChVal(GPADC_CH_S8);
@@ -557,6 +564,27 @@ uint32_t power_ReadV13(void)
         sum_val += ch_val;
     }
     ch_val = sum_val >> 4;
+#else
+
+    float temp = 0.0;
+    float sum_val = 0.0;
+
+    for (int i = 0; i < 16; i++) {
+        LL_GPADC_SetChConfig(GPADC_CH_S8);
+        ch_val = LL_GPADC_Polling_GetChVal(GPADC_CH_S8);
+
+        /*
+         * v=0.0004465 * code - 0.0064
+         */
+        temp = 0.0004465 * ch_val - 0.0064;
+
+        sum_val += temp;
+        LOG_DBG("[%d] v: %f, sum: %f", i, temp, sum_val);
+    }
+
+    ch_val = (sum_val * 1000) / 16;
+    LOG_DBG("val: %d", ch_val);
+#endif
 
     if (need_restore == true) {
        /* restore gpadc irq*/

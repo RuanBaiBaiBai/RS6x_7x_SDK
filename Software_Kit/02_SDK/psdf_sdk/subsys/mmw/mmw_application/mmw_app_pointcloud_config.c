@@ -39,7 +39,7 @@ MmwPointCloudUserCfg_t g_mmw_det_3d_user_cfg = {
 };
 
 MMWPresencePointCloudUserCfg_t g_mmw_presence_det_3d_user_cfg = {
-	/* micro ca cfar snr threshold, default 14dB */
+	/* micro ca cfar snr threshold, default 8.5dB */
 	.micro_ca_cfar_snr_th = CONFIG_MMW_PRESENCE_POINT_CLOUD_CFAR_TH_DB,
 	/* micro ca cfar snr linear threshold offset value, default 0dB(no offest) */
 	.micro_ca_cfar_snr_linear_th_offest = CONFIG_MMW_PRESENCE_POINT_CLOUD_CFAR_LINEAR_TH_OFFEST_DB,
